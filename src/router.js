@@ -12,9 +12,9 @@ export default new Router({
       component: Home,
     },
     {
-      path: "/SomeView",
-      name: "SomeView",
-      component: () => import("./views/SomeView.vue"),
+      path: "/ParallelCoordinates",
+      name: "ParallelCoordinates",
+      component: () => import("./views/ParallelCoordinates.vue"),
     },
   ],
 });
