@@ -1,4 +1,4 @@
-# health-vis
+# EnsembleVis UI
 
 ## Project setup
 ```
