@@ -168,21 +168,30 @@ export default {
             });
           });
 
-        let selected = [];
+        let local_selected = [];
         // Update foreground to only display selected values
         foreground.style("display", function (d) {
           return actives.every(function (active) {
             let result =
               active.extent[1] <= d[active.dimension] && d[active.dimension] <= active.extent[0];
-            if (result) selected.push(d);
+            if (result) {
+              local_selected.push(d);
+            }
             return result;
           })
             ? null
             : "none";
         });
+        const display = [];
+
+        local_selected.forEach((l) => {
+          if (local_selected.filter((s) => s.Index === l.Index).length === actives.length) {
+            display.push(l);
+          }
+        });
 
         actives.length > 0
-          ? out.text(d3.tsvFormat(selected.slice(0, 24)))
+          ? out.text(d3.tsvFormat([...new Set(display)].slice(0, 24)))
           : out.text(d3.tsvFormat(data.slice(0, 24)));
 
         return Promise.resolve();
