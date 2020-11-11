@@ -1,8 +1,8 @@
 <template>
-  <b-container fluid>
+  <b-col cols="12">
     <div id="parallelCoordinates"></div>
     <pre></pre>
-  </b-container>
+  </b-col>
 </template>
 
 <script>
@@ -21,9 +21,9 @@ export default {
 
       const data = await d3.csv("/assets/posterior_parameters.csv");
 
-      const margin = { top: 30, right: 10, bottom: 10, left: 10 };
+      const margin = { top: 30, right: -100, bottom: 10, left: -100 };
       const width = window.innerWidth - margin.left - margin.right;
-      const height = window.innerHeight / 2 - margin.top - margin.bottom;
+      const height = window.innerHeight / 1.5 - margin.top - margin.bottom;
 
       const x = d3.scalePoint().range([0, width]).padding(1);
       const y = {};
@@ -182,8 +182,8 @@ export default {
             ? null
             : "none";
         });
-        const display = [];
 
+        const display = [];
         local_selected.forEach((l) => {
           if (local_selected.filter((s) => s.Index === l.Index).length === actives.length) {
             display.push(l);
@@ -254,9 +254,8 @@ svg {
 }
 
 pre {
-  width: 90%;
+  width: 100%;
   height: 300px;
-  margin: auto;
   tab-size: 15;
   font-size: 10px;
 }

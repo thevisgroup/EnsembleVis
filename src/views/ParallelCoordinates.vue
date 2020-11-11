@@ -1,6 +1,10 @@
 <template>
   <b-container fluid>
-    <ParallelCoordinates></ParallelCoordinates>
+    <b-row>
+      <b-col></b-col>
+
+      <b-col col="7"><ParallelCoordinates></ParallelCoordinates></b-col>
+    </b-row>
   </b-container>
 </template>
 <script>

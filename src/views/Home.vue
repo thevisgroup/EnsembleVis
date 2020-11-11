@@ -1,5 +1,15 @@
 <template>
   <div class="home">
-    <img alt="logo" src="../assets/logo.svg" width="35%" />
+    <b-container fluid>
+      <b-row>
+        <b-col cols="4"></b-col>
+
+        <b-col cols="8">
+          <ParallelCoordinates></ParallelCoordinates>
+
+          <b-row> </b-row>
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
 </template>
