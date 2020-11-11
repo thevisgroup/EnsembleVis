@@ -26,13 +26,4 @@ nav {
   margin-bottom: 1em;
   font-weight: 600;
 }
-
-.home {
-  text-align: center;
-}
-
-canvas {
-  display: inherit;
-  text-align: left;
-}
 </style>

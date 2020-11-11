@@ -1,5 +1,5 @@
 <template>
-  <b-col cols="12">
+  <b-col cols="11">
     <div id="parallelCoordinates"></div>
     <pre></pre>
   </b-col>

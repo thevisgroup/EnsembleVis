@@ -2,7 +2,6 @@
   <b-container fluid>
     <b-row>
       <b-col></b-col>
-
       <b-col col="7"><ParallelCoordinates></ParallelCoordinates></b-col>
     </b-row>
   </b-container>
