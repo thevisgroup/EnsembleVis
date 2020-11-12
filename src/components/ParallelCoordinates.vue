@@ -1,8 +1,8 @@
 <template>
-  <b-col cols="11">
+  <div>
     <div id="parallelCoordinates"></div>
     <pre></pre>
-  </b-col>
+  </div>
 </template>
 
 <script>
