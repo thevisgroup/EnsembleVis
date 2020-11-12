@@ -23,6 +23,9 @@ Vue.component("icon", FontAwesomeIcon);
 import ParallelCoordinates from "./components/ParallelCoordinates.vue";
 Vue.component("ParallelCoordinates", ParallelCoordinates);
 
+import LineChart from "./components/LineChart.vue";
+Vue.component("LineChart", LineChart);
+
 Vue.config.productionTip = false;
 
 new Vue({
