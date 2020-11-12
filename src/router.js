@@ -11,10 +11,5 @@ export default new Router({
       name: "home",
       component: Home,
     },
-    {
-      path: "/ParallelCoordinates",
-      name: "ParallelCoordinates",
-      component: () => import("./views/ParallelCoordinates.vue"),
-    },
   ],
 });
