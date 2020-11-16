@@ -7,13 +7,23 @@
             <b-col cols="12">
               <b-card header="User options">
                 <b-form>
-                  <b-form-group label="Age Group" label-for="select_age">
+                  <!-- <b-form-group label="Age Group" label-for="select_age">
                     <b-form-select
                       id="select_age"
                       v-model="age_selected"
                       :options="generateAge()"
                     ></b-form-select>
-                  </b-form-group>
+                  </b-form-group> -->
+
+                  <label for="select_iter">Age Group: {{ age_selected }}</label>
+                  <b-form-input
+                    id="age_selected"
+                    v-model="age_selected"
+                    type="range"
+                    min="0"
+                    max="7"
+                    step="1"
+                  ></b-form-input>
 
                   <label for="select_iter">Iteration: {{ iter_selected }}</label>
                   <b-form-input
