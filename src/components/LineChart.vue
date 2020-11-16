@@ -29,7 +29,7 @@ export default {
 
       d3.selectAll("#lineChart > svg").remove();
 
-      const margin = { top: 30, right: 10, bottom: 30, left: 150 };
+      const margin = { top: 30, right: 40, bottom: 30, left: 30 };
       const width = window.innerWidth / 3 - margin.left - margin.right;
       const height = window.innerHeight / 2 - margin.top - margin.bottom;
 
@@ -47,84 +47,85 @@ export default {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      const x = d3.scaleLinear().domain([1, data.length]).range([0, width]);
+      const x = d3.scaleLinear().domain([0, data.length]).range([0, width]);
+
       svg
         .append("g")
-        .attr("transform", "translate(0," + height + ")")
+        .attr("transform", `translate(${margin.left},${height})`)
         .call(d3.axisBottom(x));
 
-      // y.domain(
-      //   dimensions.map((d) => {
-      //     return (y[d] = d3
-      //       .scaleLinear()
-      //       .domain(
-      //         d3.extent(data, function (p) {
-      //           return +p[d];
-      //         })
-      //       )
-      //       .range([height, 0]));
-      //   })
-      // );
+      const population_y = d3.scaleLinear().domain([1300000, 0]).range([0, height]);
+      // the actual population, according to the simulation log, is 5438100
 
-      let yAxes = {};
+      svg
+        .append("g")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(population_y))
+        .append("text")
+        .attr("class", "axisLabel")
+        .attr("y", -16)
+        .attr("dy", "0.8em")
+        .attr("fill", "black")
+        .style("text-anchor", "end")
+        .text("Pupolation");
 
       const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-      dimensions.forEach((dimension, i) => {
-        // Generate Y axes
-        let y = d3
-          .scaleLinear()
-          .range([height, 0])
-          .domain([
-            0,
-            d3.max(data, function (c) {
-              return +c[dimension];
-            }),
-          ]);
+      // Generate mutlt Y axes
+      // let yAxes = {};
 
-        yAxes[dimension] = y;
-
-        svg
-          .append("g")
-          .attr("transform", `translate(-${i * 40},0)`)
-          .call(d3.axisLeft(y))
-          .append("text")
-          .attr("class", "axisLabel")
-          .attr("y", -16)
-          .attr("dy", "0.8em")
-          .attr("fill", color(i))
-          .style("text-anchor", "end")
-          .text(dimension);
-      });
+      // dimensions.forEach((dimension) => {
+      // let y = d3
+      //   .scaleLinear()
+      //   .range([height, 0])
+      //   .domain([
+      //     0,
+      //     d3.max(data, function (c) {
+      //       return +c[dimension];
+      //     }),
+      //   ]);
+      // yAxes[dimension] = y;
+      // svg
+      //   .append("g")
+      //   .attr("transform", `translate(-${i * 40},0)`)
+      //   .call(d3.axisLeft(y))
+      //   .append("text")
+      //   .attr("class", "axisLabel")
+      //   .attr("y", -16)
+      //   .attr("dy", "0.8em")
+      //   .attr("fill", color(i))
+      //   .style("text-anchor", "end")
+      //   .text(dimension);
+      // });
 
       // Draw confidence interval
-      svg
-        .append("path")
-        .datum(data)
-        .attr("fill", "#cce5df")
-        .attr("stroke", "none")
-        .attr(
-          "d",
-          d3
-            .area()
-            .x(function (d, i) {
-              return x(i);
-            })
-            .y0(function (d) {
-              return yAxes.D(+d.D * 1.1);
-            })
-            .y1(function (d) {
-              return yAxes.D(+d.D * 0.8);
-            })
-        );
+      // svg
+      //   .append("path")
+      //   .datum(data)
+      //   .attr("fill", "#cce5df")
+      //   .attr("stroke", "none")
+      //   .attr(
+      //     "d",
+      //     d3
+      //       .area()
+      //       .x(function (d, i) {
+      //         return x(i);
+      //       })
+      //       .y0(function (d) {
+      //         return yAxes.D(+d.D * 1.1);
+      //       })
+      //       .y1(function (d) {
+      //         return yAxes.D(+d.D * 0.8);
+      //       })
+      //   );
 
       // Draw lines
-
       dimensions.forEach((dimension, i) => {
         svg
           .append("path")
           .attr("class", "lines")
           .datum(data)
+          .attr("transform", `translate(${margin.left},0)`)
           .attr("fill", "none")
           .attr("stroke", color(i))
           .attr("stroke-width", 1.5)
@@ -137,7 +138,8 @@ export default {
                 return x(i);
               })
               .y(function (d) {
-                return yAxes[dimension](+d[dimension]);
+                return population_y(+d[dimension]);
+                // return yAxes[dimension](+d[dimension]);
               })
           );
       });
@@ -194,6 +196,6 @@ export default {
 
 <style>
 .axisLabel {
-  font-size: 1.6em;
+  font-size: 1.2em;
 }
 </style>
