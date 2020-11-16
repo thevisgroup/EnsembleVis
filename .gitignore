@@ -22,3 +22,5 @@ yarn-error.log*
 /private
 env/
 tempCodeRunnerFile\.js
+
+public/assets/output.csv

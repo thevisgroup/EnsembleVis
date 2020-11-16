@@ -19,14 +19,14 @@ const calculateMedian = (iter = 200, age_group = 8) => {
   let parser = parse({ columns: true, trim: true, cast: true }, function (err, data) {
     for (let j = 0; j < age_group; j++) {
       for (let i = 0; i < iter; i++) {
-        console.log(`Processing age group: ${j}, iteration: ${i}`);
+        // console.log(`Processing age group: ${j}, iteration: ${i}`);
 
-        let res = "H,D,R\r\n";
+        let res = "Susceptible,Exposed,Hospitalised,Death,Recovered\r\n";
 
         data
           .filter((f) => f.iter === i && f.age_group === j)
           .forEach((f) => {
-            res += `${f.H},${f.D},${f.R}\r\n`;
+            res += `${f.S},${f.E},${f.H},${f.D},${f.R}\r\n`;
           });
 
         write({ iter: i, age_group: j }, res);
@@ -34,7 +34,7 @@ const calculateMedian = (iter = 200, age_group = 8) => {
     }
   });
 
-  fs.createReadStream(path.resolve(__dirname, "../../public/assets/output1 copy.csv")).pipe(parser);
+  fs.createReadStream(path.resolve(__dirname, "../../public/assets/output.csv")).pipe(parser);
 };
 
 calculateMedian();
