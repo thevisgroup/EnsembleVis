@@ -25,15 +25,15 @@
                     step="1"
                   ></b-form-input>
 
-                  <label for="select_iter">Iteration: {{ iter_selected }}</label>
+                  <!-- <label for="select_iter">Day: {{ day_selected }}</label>
                   <b-form-input
-                    id="select_iter"
-                    v-model="iter_selected"
+                    id="select_iday"
+                    v-model="day_selected"
                     type="range"
                     min="1"
                     max="200"
                     step="1"
-                  ></b-form-input>
+                  ></b-form-input> -->
                 </b-form>
               </b-card>
             </b-col>
@@ -41,7 +41,7 @@
 
           <b-row class="mt-2">
             <b-col cols="12">
-              <LineChart :data="{ age_group: age_selected, iteration: iter_selected }"></LineChart>
+              <LineChart :data="{ age_group: age_selected, day: day_selected }"></LineChart>
             </b-col>
           </b-row>
         </b-col>
@@ -58,7 +58,7 @@ export default {
   data() {
     return {
       age_selected: 0,
-      iter_selected: 1,
+      day_selected: 1,
     };
   },
   methods: {

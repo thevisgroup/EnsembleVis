@@ -163,7 +163,7 @@ export default {
     },
     async load() {
       this.chartData.data = await d3.csv(
-        `/assets/data/out/${this.data.age_group}/${this.data.iteration - 1}.csv`
+        `/assets/data/out/${this.data.age_group}/${this.data.day - 1}.csv`
       );
 
       this.chartData.dimensions = Object.keys(this.chartData.data[0]);
