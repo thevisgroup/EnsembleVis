@@ -216,7 +216,7 @@ export default {
 
 <style>
 svg {
-  font: 10px sans-serif;
+  font: 1.2rem;
 }
 
 .background path {
@@ -246,17 +246,17 @@ svg {
 .axis text {
   fill: black;
   text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+  font-size: 1.2rem !important;
 }
 
 .axis .yLabel {
   font-weight: bolder;
-  font-size: 1rem;
+  font-size: 1.4rem !important;
 }
 
 pre {
   width: 100%;
   height: 300px;
   tab-size: 15;
-  font-size: 10px;
 }
 </style>

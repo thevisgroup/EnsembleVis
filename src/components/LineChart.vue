@@ -29,7 +29,7 @@ export default {
 
       d3.selectAll("#lineChart > svg").remove();
 
-      const margin = { top: 30, right: 40, bottom: 30, left: 30 };
+      const margin = { top: 30, right: 40, bottom: 30, left: 40 };
       const width = window.innerWidth / 3 - margin.left - margin.right;
       const height = window.innerHeight / 2 - margin.top - margin.bottom;
 
@@ -62,9 +62,8 @@ export default {
         .attr("transform", `translate(${margin.left},0)`)
         .call(d3.axisLeft(population_y))
         .append("text")
-        .attr("class", "axisLabel")
-        .attr("y", -16)
-        .attr("dy", "0.8em")
+        .attr("class", "xLabel")
+        .attr("dy", "-1em")
         .attr("fill", "black")
         .style("text-anchor", "end")
         .text("Pupolation");
@@ -148,7 +147,7 @@ export default {
       dimensions.forEach((dimension, i) => {
         svg
           .append("rect")
-          .attr("x", width - 30)
+          .attr("x", width - margin.right * 2)
           .attr("y", i * 20)
           .attr("width", 10)
           .attr("height", 10)
@@ -156,8 +155,8 @@ export default {
 
         svg
           .append("text")
-          .attr("x", width - 17)
-          .attr("y", i * 20 + 8)
+          .attr("x", width - margin.right * 1.5)
+          .attr("y", i * 20 + 10)
           .text(dimension);
       });
     },
@@ -195,7 +194,12 @@ export default {
 </script>
 
 <style>
-.axisLabel {
+.xLabel {
+  font-weight: bolder;
+  font-size: 1.5em;
+}
+
+text[fill="currentColor"] {
   font-size: 1.2em;
 }
 </style>
