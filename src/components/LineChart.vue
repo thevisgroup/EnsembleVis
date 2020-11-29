@@ -120,14 +120,14 @@ export default {
 
       // Draw lines
       dimensions.forEach((dimension, i) => {
-        svg
+        let line = svg
           .append("path")
           .attr("class", "lines")
           .datum(data)
           .attr("transform", `translate(${margin.left},0)`)
           .attr("fill", "none")
           .attr("stroke", color(i))
-          .attr("stroke-width", 1.5)
+          .attr("stroke-width", 3)
           // .attr("d", path);
           .attr(
             "d",
@@ -141,6 +141,9 @@ export default {
                 // return yAxes[dimension](+d[dimension]);
               })
           );
+        if (dimension === "Recovered") {
+          line.style("stroke-dasharray", "3, 3");
+        }
       });
 
       // Generate color legends
