@@ -66,7 +66,7 @@ export default {
         .attr("dy", "-1em")
         .attr("fill", "black")
         .style("text-anchor", "end")
-        .text("Pupolation");
+        .text("Population");
 
       const color = d3.scaleOrdinal(d3.schemeCategory10);
 
