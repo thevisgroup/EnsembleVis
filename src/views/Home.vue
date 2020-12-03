@@ -41,7 +41,9 @@
 
           <b-row class="mt-2">
             <b-col cols="12">
-              <LineChart :data="{ age_group: age_selected, day: day_selected }"></LineChart>
+              <LineChart
+                :data="{ age_group: age_selected, simulation: options.simulation_selected }"
+              ></LineChart>
             </b-col>
           </b-row>
         </b-col>
@@ -54,11 +56,11 @@
   </div>
 </template>
 <script>
+import { mapState } from "vuex";
 export default {
   data() {
     return {
       age_selected: 0,
-      day_selected: 1,
     };
   },
   methods: {
@@ -71,7 +73,9 @@ export default {
     },
   },
   watch: {},
-  computed: {},
+  computed: {
+    ...mapState(["options"]),
+  },
   mounted() {},
 };
 </script>

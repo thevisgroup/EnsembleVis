@@ -2,6 +2,15 @@ import Vue from "vue";
 import Vuex from "vuex";
 Vue.use(Vuex);
 
+const options = {
+  namespaced: true,
+  state: {
+    simulation_selected: 0,
+  },
+  mutations: {},
+  getters: {},
+};
+
 const colorScheme = {
   namespaced: true,
   state: {
@@ -29,5 +38,6 @@ const colorScheme = {
 export default new Vuex.Store({
   modules: {
     colorScheme,
+    options,
   },
 });

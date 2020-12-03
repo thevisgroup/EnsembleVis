@@ -6,17 +6,19 @@
 
 <script>
 import * as d3 from "d3";
-// import { mapState } from "vuex";
+import { mapState } from "vuex";
 
 export default {
   name: "LineChart",
   props: ["data"],
-  computed: {},
+  computed: {
+    ...mapState(["options"]),
+  },
   data() {
     return {
       chartData: {
         data: null,
-        dimensions: null,
+        dimensions: ["Susceptible", "Exposed", "Hospitalised", "Recovered", "Death"],
       },
       key: 0,
     };
@@ -141,7 +143,7 @@ export default {
                 // return yAxes[dimension](+d[dimension]);
               })
           );
-        if (dimension === "Recovered") {
+        if (__VM.getRealHeader(dimension) === "Recovered") {
           line.style("stroke-dasharray", "3, 3");
         }
       });
@@ -160,17 +162,27 @@ export default {
           .append("text")
           .attr("x", width - margin.right * 1.5)
           .attr("y", i * 20 + 10)
-          .text(dimension);
+          .text(__VM.getRealHeader(dimension));
       });
     },
     async load() {
       this.chartData.data = await d3.csv(
-        `/assets/data/out/${this.data.age_group}/${this.data.day - 1}.csv`
+        `/assets/data/output/simu_${this.options.simulation_selected}/age_${this.data.age_group}.csv`
       );
 
-      this.chartData.dimensions = Object.keys(this.chartData.data[0]);
+      this.chartData.dimensions = Object.keys(this.chartData.data[0]).filter((d) => d !== " day");
 
       this.draw();
+    },
+    getRealHeader(text) {
+      const list = {
+        S: "Susceptible",
+        E: "Exposed",
+        H: "Hospitalised",
+        R: "Recovered",
+        D: "Death",
+      };
+      return list[text.trim()];
     },
   },
   async mounted() {

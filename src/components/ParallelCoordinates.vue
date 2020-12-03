@@ -1,26 +1,58 @@
 <template>
   <div>
     <div id="parallelCoordinates"></div>
-    <pre></pre>
+    <div id="res_table"></div>
+
+    <b-table
+      striped
+      hover
+      sticky-header
+      :items="tableData"
+      :fields="headers"
+      sort-by.sync="Index"
+      sort-desc.sync="false"
+      responsive="sm"
+    >
+      <!-- eslint-disable-next-line -->
+      <template #cell(Index)="row">
+        <b-button
+          size="sm"
+          :variant="options.simulation_selected === row.item.Index ? 'primary' : 'secondary'"
+          @click="options.simulation_selected = row.item.Index"
+          class="mr-2"
+        >
+          {{ row.item.Index }}
+        </b-button>
+      </template>
+    </b-table>
   </div>
 </template>
 
 <script>
 import * as d3 from "d3";
-// import { mapState } from "vuex";
+import { mapState } from "vuex";
 
 export default {
   name: "ParallelCoordinates",
-  computed: {},
+  computed: {
+    ...mapState(["options"]),
+  },
   data() {
-    return {};
+    return {
+      rowsToDisplay: 30,
+      dimensions: [],
+      data: null,
+      tableData: [],
+      headers: [],
+    };
   },
   methods: {
     async init() {
+      const __VM = this;
+
       d3.selectAll("#parallelCoordinates > svg").remove();
 
-      const data = await d3.csv("/assets/posterior_parameters.csv");
-
+      __VM.data = (await d3.csv("/assets/posterior_parameters.csv", d3.autoType)).slice(0, 40);
       const margin = { top: 30, right: -100, bottom: 10, left: -100 };
       const width = window.innerWidth - margin.left - margin.right;
       const height = window.innerHeight / 1.5 - margin.top - margin.bottom;
@@ -31,7 +63,7 @@ export default {
       const colorScheme = d3.interpolateTurbo;
       const axis = d3.axisLeft();
 
-      let background, foreground, dimensions;
+      let background, foreground;
 
       const svg = d3
         .select("#parallelCoordinates")
@@ -48,7 +80,7 @@ export default {
 
       // Extract the list of dimensions and create a scale for each.
       x.domain(
-        (dimensions = Object.keys(data[0]).filter(function (d) {
+        (__VM.dimensions = Object.keys(__VM.data[0]).filter(function (d) {
           return (
             d !== "Index" &&
             d !== "rrd" &&
@@ -56,7 +88,7 @@ export default {
             (y[d] = d3
               .scaleLinear()
               .domain(
-                d3.extent(data, function (p) {
+                d3.extent(__VM.data, function (p) {
                   return +p[d];
                 })
               )
@@ -65,12 +97,23 @@ export default {
         }))
       );
 
+      __VM.headers = Object.keys(__VM.data[0]).map((d) => {
+        const res = { key: d, sortable: true };
+
+        if (d === "Index") {
+          res.variant = "secondary";
+          res.stickyColumn = true;
+        }
+
+        return res;
+      });
+
       let colors = {};
-      Object.keys(data[0]).map((d) => {
+      Object.keys(__VM.data[0]).map((d) => {
         colors[d] = d3
           .scaleSequential()
           .domain(
-            d3.extent(data, function (d) {
+            d3.extent(__VM.data, function (d) {
               return +d[name];
             })
           )
@@ -83,7 +126,7 @@ export default {
         .append("g")
         .attr("class", "background")
         .selectAll("path")
-        .data(data)
+        .data(__VM.data)
         .enter()
         .append("path")
         .attr("d", path);
@@ -93,7 +136,7 @@ export default {
         .append("g")
         .attr("class", "foreground")
         .selectAll("path")
-        .data(data)
+        .data(__VM.data)
         .enter()
         .append("path")
         .attr("d", path);
@@ -101,7 +144,7 @@ export default {
       // Add a group element for each dimension.
       const g = svg
         .selectAll(".dimension")
-        .data(dimensions)
+        .data(__VM.dimensions)
         .enter()
         .append("g")
         .attr("class", "dimension")
@@ -141,15 +184,14 @@ export default {
       // Returns the path for a given data point.
       function path(d) {
         const res = d3.line()(
-          dimensions.map(function (p) {
+          __VM.dimensions.map(function (p) {
             return [x(p), y[p](d[p])];
           })
         );
         return res;
       }
 
-      let out = d3.select("pre");
-      out.text(d3.tsvFormat(data.slice(0, 24)));
+      __VM.tableData = __VM.data.slice(0, __VM.rowsToDisplay);
 
       // Handles a brush event, toggling the display of foreground lines.
       function brush() {
@@ -191,8 +233,8 @@ export default {
         });
 
         actives.length > 0
-          ? out.text(d3.tsvFormat([...new Set(display)].slice(0, 24)))
-          : out.text(d3.tsvFormat(data.slice(0, 24)));
+          ? (__VM.tableData = [...new Set(display)].slice(0, __VM.rowsToDisplay))
+          : (__VM.tableData = __VM.data.slice(0, __VM.rowsToDisplay));
 
         return Promise.resolve();
       }
@@ -254,9 +296,7 @@ svg {
   font-size: 1.4rem !important;
 }
 
-pre {
-  width: 100%;
-  height: 300px;
-  tab-size: 15;
+table {
+  font-size: 0.8rem !important;
 }
 </style>
