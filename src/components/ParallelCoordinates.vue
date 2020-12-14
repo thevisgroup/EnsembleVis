@@ -39,7 +39,7 @@ export default {
   },
   data() {
     return {
-      rowsToDisplay: 999,
+      rowsToDisplay: 160,
       dimensions: [],
       data: null,
       tableData: [],
@@ -52,7 +52,10 @@ export default {
 
       d3.selectAll("#parallelCoordinates > svg").remove();
 
-      __VM.data = (await d3.csv("/assets/posterior_parameters.csv", d3.autoType)).slice(0, 139);
+      __VM.data = (await d3.csv("/assets/posterior_parameters.csv", d3.autoType)).slice(
+        0,
+        __VM.rowsToDisplay
+      );
       const margin = { top: 30, right: -100, bottom: 10, left: -100 };
       const width = window.innerWidth - margin.left - margin.right;
       const height = window.innerHeight / 1.5 - margin.top - margin.bottom;

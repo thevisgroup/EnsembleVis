@@ -24,3 +24,5 @@ env/
 tempCodeRunnerFile\.js
 
 public/assets/output.csv
+
+src/util/tempCodeRunnerFile.py

@@ -99,29 +99,35 @@ export default {
       //   .text(dimension);
       // });
 
-      // Draw confidence interval
-      // svg
-      //   .append("path")
-      //   .datum(data)
-      //   .attr("fill", "#cce5df")
-      //   .attr("stroke", "none")
-      //   .attr(
-      //     "d",
-      //     d3
-      //       .area()
-      //       .x(function (d, i) {
-      //         return x(i);
-      //       })
-      //       .y0(function (d) {
-      //         return yAxes.D(+d.D * 1.1);
-      //       })
-      //       .y1(function (d) {
-      //         return yAxes.D(+d.D * 0.8);
-      //       })
-      //   );
-
-      // Draw lines
       dimensions.forEach((dimension, i) => {
+        // Draw confidence interval
+        svg
+          .append("path")
+          .attr("class", "interval")
+          .datum(data)
+          .attr("transform", `translate(${margin.left},0)`)
+          .attr("fill", color(i))
+          .attr("fill-opacity", 0.25)
+          .attr(
+            "d",
+            d3
+              .area()
+              .x(function (d, i) {
+                return x(i);
+              })
+              .y0(function (d) {
+                // upper
+                const cal = +d[dimension.replace("mean", "max")];
+                return population_y(cal);
+              })
+              .y1(function (d) {
+                // lower
+                const cal = +d[dimension.replace("mean", "min")];
+                return population_y(cal);
+              })
+          );
+
+        // Draw lines
         let line = svg
           .append("path")
           .attr("class", "lines")
@@ -143,6 +149,7 @@ export default {
                 // return yAxes[dimension](+d[dimension]);
               })
           );
+
         if (__VM.getRealHeader(dimension) === "Recovered") {
           line.style("stroke-dasharray", "3, 3");
         }
@@ -170,19 +177,23 @@ export default {
         `/assets/data/output/simu_${this.options.simulation_selected}/age_${this.data.age_group}.csv`
       );
 
-      this.chartData.dimensions = Object.keys(this.chartData.data[0]).filter((d) => d !== " day");
+      this.chartData.dimensions = Object.keys(this.chartData.data[0]).filter(
+        (d) => d !== "day" && !d.includes("min") && !d.includes("max")
+      );
 
       this.draw();
     },
     getRealHeader(text) {
       const list = {
-        S: "Susceptible",
-        E: "Exposed",
-        H: "Hospitalised",
-        R: "Recovered",
-        D: "Death",
+        S_mean: "Susceptible",
+        E_mean: "Exposed",
+        H_mean: "Hospitalised",
+        R_mean: "Recovered",
+        D_mean: "Death",
+        I_mean: "Symptomatic",
+        IS_mean: "Asymptomatic",
       };
-      return list[text.trim()];
+      return list[text];
     },
   },
   async mounted() {
