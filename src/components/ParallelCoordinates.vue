@@ -1,8 +1,6 @@
 <template>
   <div>
     <div id="parallelCoordinates"></div>
-    <div id="res_table"></div>
-
     <b-table
       striped
       hover
@@ -52,10 +50,7 @@ export default {
 
       d3.selectAll("#parallelCoordinates > svg").remove();
 
-      __VM.data = (await d3.csv("/assets/posterior_parameters.csv", d3.autoType)).slice(
-        0,
-        __VM.rowsToDisplay
-      );
+      __VM.data = await d3.csv("/assets/posterior_parameters.csv", d3.autoType);
       const margin = { top: 30, right: -100, bottom: 10, left: -100 };
       const width = window.innerWidth - margin.left - margin.right;
       const height = window.innerHeight / 1.5 - margin.top - margin.bottom;
@@ -83,7 +78,7 @@ export default {
 
       // Extract the list of dimensions and create a scale for each.
       x.domain(
-        (__VM.dimensions = Object.keys(__VM.data[0]).filter(function (d) {
+        (__VM.dimensions = Object.keys(__VM.data[0]).filter((d) => {
           return (
             d !== "Index" &&
             d !== "rrd" &&

@@ -52,6 +52,10 @@
           <ParallelCoordinates></ParallelCoordinates>
         </b-col>
       </b-row>
+
+      <b-row>
+        <Matrix></Matrix>
+      </b-row>
     </b-container>
   </div>
 </template>

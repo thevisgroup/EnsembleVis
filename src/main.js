@@ -26,6 +26,9 @@ Vue.component("ParallelCoordinates", ParallelCoordinates);
 import LineChart from "./components/LineChart.vue";
 Vue.component("LineChart", LineChart);
 
+import Matrix from "./components/Matrix.vue";
+Vue.component("Matrix", Matrix);
+
 Vue.config.productionTip = false;
 
 new Vue({
