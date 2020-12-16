@@ -32,11 +32,11 @@ export default {
 
       const columns = Object.keys(__VM.data[0])
         .filter((d) => d !== "Index" && d !== "rrd" && d !== "K")
-        .splice(0, 2);
+        .splice(0, 5);
 
       // const margin = { top: 30, right: -100, bottom: 10, left: -100 };
       const padding = 20;
-      const width = window.innerWidth / 4;
+      const width = window.innerWidth / 2;
       const size = (width - (columns.length + 1) * padding) / columns.length + padding;
       // const height = window.innerHeight / 1.5 - margin.top - margin.bottom;
       const svg = d3
