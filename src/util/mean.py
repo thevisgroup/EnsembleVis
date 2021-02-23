@@ -32,7 +32,7 @@ for i in range(1, 161):
                     ['day'])[header].agg(['mean', 'min', 'max'])
 
                 # rename columns
-                result.columns = ["_".join(x) for x in result.columns.ravel()]
+                result.columns = ["_".join(x) for x in result.columns.values]
 
                 # write file
                 out = os.path.join(
