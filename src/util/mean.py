@@ -4,8 +4,8 @@ import os
 
 dirname = os.path.dirname(__file__)
 
-symptomatic = ['I1', 'I2', 'I3', 'I4']
-asymptomatic = ['I_s1', 'I_s2', 'I_s3', 'I_s4']
+asymptomatic = ['I1', 'I2', 'I3', 'I4']
+symptomatic = ['I_s1', 'I_s2', 'I_s3', 'I_s4']
 
 header = ['S', 'E', 'H', 'R', 'D']
 col_list = ['iter', 'day', 'age_group'] + header + symptomatic + asymptomatic
@@ -22,8 +22,8 @@ for i in range(1, 161):
                              skipinitialspace=True).fillna(0)
 
             # sum symptomatic and asymptomatic cases
-            df['I'] = df[symptomatic].sum(axis=1)
-            df['IS'] = df[asymptomatic].sum(axis=1)
+            df['IS'] = df[symptomatic].sum(axis=1)
+            df['I'] = df[asymptomatic].sum(axis=1)
 
             print(f'writing simu_{i}')
             for j in range(0, 8):
