@@ -17,8 +17,12 @@ export default {
   data() {
     return {
       chartData: {
-        data: null,
-        dimensions: ["Susceptible", "Exposed", "Hospitalised", "Recovered", "Death"],
+        // currently selected age group
+        focusData: null,
+        // all age groups not in focus
+        contextData: null,
+        // dimentsions on the line chart
+        dimensions: [],
       },
     };
   },
@@ -26,7 +30,7 @@ export default {
     draw() {
       const __VM = this;
 
-      const { data, dimensions } = __VM.chartData;
+      const { focusData, contextData, dimensions } = __VM.chartData;
 
       d3.selectAll("#lineChart > svg").remove();
 
@@ -48,7 +52,7 @@ export default {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      const x = d3.scaleLinear().domain([0, data.length]).range([0, width]);
+      const x = d3.scaleLinear().domain([0, focusData.length]).range([0, width]);
 
       svg
         .append("g")
@@ -98,61 +102,72 @@ export default {
       //   .text(dimension);
       // });
 
-      dimensions.forEach((dimension, i) => {
-        // Draw confidence interval
-        svg
-          .append("path")
-          .attr("class", "interval")
-          .datum(data)
-          .attr("transform", `translate(${margin.left},0)`)
-          .attr("fill", color(i))
-          .attr("fill-opacity", 0.25)
-          .attr(
-            "d",
-            d3
-              .area()
-              .x(function (d, i) {
-                return x(i);
-              })
-              .y0(function (d) {
-                // upper
-                const cal = +d[dimension.replace("mean", "max")];
-                return population_y(cal);
-              })
-              .y1(function (d) {
-                // lower
-                const cal = +d[dimension.replace("mean", "min")];
-                return population_y(cal);
-              })
-          );
+      const drawLines = (data, focus = true) => {
+        dimensions.forEach((dimension, i) => {
+          if (focus) {
+            // Draw confidence interval
+            svg
+              .append("path")
+              .attr("class", "interval")
+              .datum(data)
+              .attr("transform", `translate(${margin.left},0)`)
+              .attr("fill", color(i))
+              .attr("fill-opacity", 0.25)
+              .attr(
+                "d",
+                d3
+                  .area()
+                  .x(function (d, i) {
+                    return x(i);
+                  })
+                  .y0(function (d) {
+                    // upper
+                    const cal = +d[dimension.replace("mean", "max")];
+                    return population_y(cal);
+                  })
+                  .y1(function (d) {
+                    // lower
+                    const cal = +d[dimension.replace("mean", "min")];
+                    return population_y(cal);
+                  })
+              );
+          }
 
-        // Draw lines
-        let line = svg
-          .append("path")
-          .attr("class", "lines")
-          .datum(data)
-          .attr("transform", `translate(${margin.left},0)`)
-          .attr("fill", "none")
-          .attr("stroke", color(i))
-          .attr("stroke-width", 3)
-          // .attr("d", path);
-          .attr(
-            "d",
-            d3
-              .line()
-              .x(function (d, i) {
-                return x(i);
-              })
-              .y(function (d) {
-                return population_y(+d[dimension]);
-                // return yAxes[dimension](+d[dimension]);
-              })
-          );
+          let line = svg
+            .append("path")
+            .attr("class", "lines")
+            .datum(data)
+            .attr("transform", `translate(${margin.left},0)`)
+            .attr("fill", "none")
+            .attr("stroke", focus ? color(i) : "#E3E3E3")
+            .attr("stroke-width", 3)
+            // .attr("d", path);
+            .attr(
+              "d",
+              d3
+                .line()
+                .x(function (d, i) {
+                  return x(i);
+                })
+                .y(function (d) {
+                  return population_y(+d[dimension]);
+                  // return yAxes[dimension](+d[dimension]);
+                })
+            );
 
-        if (__VM.getRealHeader(dimension) === "Recovered") {
-          line.style("stroke-dasharray", "3, 3");
+          if (__VM.getRealHeader(dimension) === "Recovered") {
+            line.style("stroke-dasharray", "3, 3");
+          }
+        });
+      };
+
+      contextData.forEach((data, i) => {
+        if (i !== __VM.data.age_group) {
+          drawLines(data, false);
         }
       });
+
+      drawLines(focusData);
 
       // Generate color legends
       dimensions.forEach((dimension, i) => {
@@ -172,11 +187,19 @@ export default {
       });
     },
     async load() {
-      this.chartData.data = await d3.csv(
-        `/assets/data/output/simu_${this.options.simulation_selected}/age_${this.data.age_group}.csv`
-      );
-
-      this.chartData.dimensions = Object.keys(this.chartData.data[0]).filter(
+      // load all data into context
+      const promises = [];
+      for (let age_group = 0; age_group < 8; age_group++) {
+        promises.push(
+          await d3.csv(
+            `/assets/data/output/simu_${this.options.simulation_selected}/age_${age_group}.csv`
+          )
+        );
+      }
+      this.chartData.contextData = await Promise.all(promises);
+      // load focus data from context
+      this.chartData.focusData = this.chartData.contextData[this.data.age_group];
+      this.chartData.dimensions = Object.keys(this.chartData.focusData[0]).filter(
         (d) => d !== "day" && !d.includes("min") && !d.includes("max")
       );
 
@@ -189,8 +212,8 @@ export default {
         H_mean: "Hospitalised",
         R_mean: "Recovered",
         D_mean: "Death",
-        I_mean: "Symptomatic",
-        IS_mean: "Asymptomatic",
+        I_mean: "Asymptomatic",
+        IS_mean: "Symptomatic",
       };
       return list[text];
     },
