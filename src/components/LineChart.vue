@@ -20,7 +20,6 @@ export default {
         data: null,
         dimensions: ["Susceptible", "Exposed", "Hospitalised", "Recovered", "Death"],
       },
-      key: 0,
     };
   },
   methods: {

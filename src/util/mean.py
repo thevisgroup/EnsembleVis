@@ -11,8 +11,8 @@ header = ['S', 'E', 'H', 'R', 'D']
 col_list = ['iter', 'day', 'age_group'] + header + symptomatic + asymptomatic
 header = header + ['I', 'IS']
 
-for i in range(1, 161):
-    dir = f'/Volumes/Travis/UQVis/output_row_{i-1}'
+for i in range(0, 160):
+    dir = f'/Volumes/Travis/UQVis/output_row_{i}'
 
     files = os.listdir(dir)
     for file in files:
