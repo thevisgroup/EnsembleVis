@@ -2,5 +2,5 @@
   "cSpell.words": [
     "EPSRC"
   ],
-  "python.pythonPath": "/usr/local/Caskroom/miniconda/base/envs/ensemble/bin/python"
+  "python.pythonPath": "/usr/local/Caskroom/miniconda/base/envs/py39/bin/python"
 }

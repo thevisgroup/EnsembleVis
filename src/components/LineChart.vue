@@ -6,14 +6,10 @@
 
 <script>
 import * as d3 from "d3";
-import { mapState } from "vuex";
 
 export default {
   name: "LineChart",
   props: ["data"],
-  computed: {
-    ...mapState(["options"]),
-  },
   data() {
     return {
       chartData: {
@@ -162,7 +158,7 @@ export default {
       };
 
       contextData.forEach((data, i) => {
-        if (i !== __VM.data.age_group) {
+        if (i !== __VM.data.age_selected) {
           drawLines(data, false);
         }
       });
@@ -192,13 +188,13 @@ export default {
       for (let age_group = 0; age_group < 8; age_group++) {
         promises.push(
           await d3.csv(
-            `/assets/data/output/simu_${this.options.simulation_selected}/age_${age_group}.csv`
+            `/assets/data/output/simu_${this.data.simulation_selected}/age_${age_group}.csv`
           )
         );
       }
       this.chartData.contextData = await Promise.all(promises);
       // load focus data from context
-      this.chartData.focusData = this.chartData.contextData[this.data.age_group];
+      this.chartData.focusData = this.chartData.contextData[this.data.age_selected];
       this.chartData.dimensions = Object.keys(this.chartData.focusData[0]).filter(
         (d) => d !== "day" && !d.includes("min") && !d.includes("max")
       );

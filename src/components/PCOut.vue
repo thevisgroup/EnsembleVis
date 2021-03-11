@@ -1,55 +1,29 @@
 <template>
   <div>
-    <div id="parallelCoordinates"></div>
-    <b-table
-      striped
-      hover
-      sticky-header
-      :items="tableData"
-      :fields="headers"
-      sort-by.sync="Index"
-      sort-desc.sync="false"
-      responsive="sm"
-    >
-      <template #cell(Index)="row">
-        <b-button
-          size="sm"
-          :variant="options.simulation_selected === row.item.Index ? 'primary' : 'secondary'"
-          @click="options.simulation_selected = row.item.Index"
-          class="mr-2"
-        >
-          {{ row.item.Index }}
-        </b-button>
-      </template>
-    </b-table>
+    <div id="parallelCoordinatesOutput"></div>
   </div>
 </template>
 
 <script>
 import * as d3 from "d3";
-import { mapState } from "vuex";
 
 export default {
-  name: "ParallelCoordinates",
-  computed: {
-    ...mapState(["options"]),
-  },
+  name: "ParallelCoordinatesOutput",
+  props: ["data"],
   data() {
     return {
-      rowsToDisplay: 160,
       dimensions: [],
-      data: null,
-      tableData: [],
-      headers: [],
     };
   },
   methods: {
-    async init() {
+    async load() {
       const __VM = this;
 
-      d3.selectAll("#parallelCoordinates > svg").remove();
-
-      __VM.data = await d3.csv("/assets/posterior_parameters.csv", d3.autoType);
+      // eslint-disable-next-line vue/no-mutating-props
+      __VM.data.pcdata = await d3.csv(
+        `/assets/data/output/simu_${__VM.data.simulation_selected}/age_${__VM.data.age_selected}.csv`,
+        d3.autoType
+      );
       const margin = { top: 30, right: -100, bottom: 10, left: -100 };
       const width = window.innerWidth - margin.left - margin.right;
       const height = window.innerHeight / 1.5 - margin.top - margin.bottom;
@@ -63,8 +37,9 @@ export default {
       let background, foreground;
 
       const svg = d3
-        .select("#parallelCoordinates")
+        .select("#parallelCoordinatesOutput")
         .append("svg")
+        .attr("class", `pcout_${__VM.data.simulation_selected}_${__VM.data.age_selected}`)
         .attr("width", "100%")
         .attr("height", "100%")
         .attr(
@@ -75,17 +50,20 @@ export default {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+      d3.selectAll(
+        `#parallelCoordinatesOutput > svg:not(.pcout_${__VM.data.simulation_selected}_${__VM.data.age_selected})`
+      ).remove();
+
       // Extract the list of dimensions and create a scale for each.
       x.domain(
-        (__VM.dimensions = Object.keys(__VM.data[0]).filter((d) => {
+        (__VM.dimensions = Object.keys(__VM.data.pcdata[0]).filter((d) => {
           return (
-            d !== "Index" &&
-            d !== "rrd" &&
-            d !== "K" &&
+            !d.includes("min") &&
+            !d.includes("max") &&
             (y[d] = d3
               .scaleLinear()
               .domain(
-                d3.extent(__VM.data, function (p) {
+                d3.extent(__VM.data.pcdata, function (p) {
                   return +p[d];
                 })
               )
@@ -94,23 +72,12 @@ export default {
         }))
       );
 
-      __VM.headers = Object.keys(__VM.data[0]).map((d) => {
-        const res = { key: d, sortable: true };
-
-        if (d === "Index") {
-          res.variant = "secondary";
-          res.stickyColumn = true;
-        }
-
-        return res;
-      });
-
       let colors = {};
-      Object.keys(__VM.data[0]).map((d) => {
+      Object.keys(__VM.data.pcdata[0]).map((d) => {
         colors[d] = d3
           .scaleSequential()
           .domain(
-            d3.extent(__VM.data, function (d) {
+            d3.extent(__VM.data.pcdata, function (d) {
               return +d[name];
             })
           )
@@ -123,7 +90,7 @@ export default {
         .append("g")
         .attr("class", "background")
         .selectAll("path")
-        .data(__VM.data)
+        .data(__VM.data.pcdata)
         .enter()
         .append("path")
         .attr("d", path);
@@ -133,7 +100,7 @@ export default {
         .append("g")
         .attr("class", "foreground")
         .selectAll("path")
-        .data(__VM.data)
+        .data(__VM.data.pcdata)
         .enter()
         .append("path")
         .attr("d", path);
@@ -188,8 +155,6 @@ export default {
         return res;
       }
 
-      __VM.tableData = __VM.data.slice(0, __VM.rowsToDisplay);
-
       // Handles a brush event, toggling the display of foreground lines.
       function brush() {
         const actives = [];
@@ -229,27 +194,34 @@ export default {
           }
         });
 
-        actives.length > 0
-          ? (__VM.tableData = [...new Set(display)].slice(0, __VM.rowsToDisplay))
-          : (__VM.tableData = __VM.data.slice(0, __VM.rowsToDisplay));
-
         return Promise.resolve();
       }
     },
   },
   async mounted() {
     const __VM = this;
-    await __VM.init();
+    await __VM.load();
 
     let resizeTimer;
     d3.select(window).on("resize", async () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(async () => {
-        await __VM.init();
+        await __VM.load();
       }, 250);
     });
   },
-  watch: {},
+  watch: {
+    "data.simulation_selected": {
+      handler: function () {
+        this.load();
+      },
+    },
+    "data.age_selected": {
+      handler: function () {
+        this.load();
+      },
+    },
+  },
 };
 </script>
 

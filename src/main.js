@@ -23,6 +23,9 @@ Vue.component("icon", FontAwesomeIcon);
 import ParallelCoordinates from "./components/ParallelCoordinates.vue";
 Vue.component("ParallelCoordinates", ParallelCoordinates);
 
+import PCOut from "./components/PCOut.vue";
+Vue.component("PCOut", PCOut);
+
 import LineChart from "./components/LineChart.vue";
 Vue.component("LineChart", LineChart);
 
