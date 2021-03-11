@@ -67,6 +67,14 @@
             }"
           ></PCOut>
         </b-col>
+        <b-col cols="4">
+          <Umap
+            :data="{
+              age_selected: options.age_selected,
+              simulation_selected: options.simulation_selected,
+            }"
+          ></Umap>
+        </b-col>
       </b-row>
       <b-row v-if="show_matrix">
         <Matrix></Matrix>

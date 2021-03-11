@@ -26,6 +26,9 @@ Vue.component("ParallelCoordinates", ParallelCoordinates);
 import PCOut from "./components/PCOut.vue";
 Vue.component("PCOut", PCOut);
 
+import Umap from "./components/Umap.vue";
+Vue.component("Umap", Umap);
+
 import LineChart from "./components/LineChart.vue";
 Vue.component("LineChart", LineChart);
 
