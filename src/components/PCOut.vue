@@ -24,6 +24,26 @@ export default {
         `/assets/data/output/simu_${__VM.data.simulation_selected}/age_${__VM.data.age_selected}.csv`,
         d3.autoType
       );
+
+      let avgPolylines = await d3.csv(
+        `/assets/data/output/simu_${__VM.data.simulation_selected}/avgPolyline.csv`,
+        d3.autoType
+      );
+      // add age_group axis
+      // eslint-disable-next-line vue/no-mutating-props
+      __VM.data.pcdata.columns.unshift("age_group");
+      __VM.data.pcdata.forEach((i) => (i["age_group"] = __VM.data.age_selected));
+
+      // add isAvg for highlighting
+      // eslint-disable-next-line vue/no-mutating-props
+      __VM.data.pcdata.columns.push("isAvg");
+      __VM.data.pcdata.forEach((i) => (i["isAvg"] = false));
+      avgPolylines.columns.push("isAvg");
+      avgPolylines.forEach((i) => (i["isAvg"] = true));
+
+      const data = [...__VM.data.pcdata, ...avgPolylines];
+      data.columns = avgPolylines.columns;
+
       const margin = { top: 30, right: -100, bottom: 10, left: -100 };
       const width = window.innerWidth - margin.left - margin.right;
       const height = window.innerHeight / 1.5 - margin.top - margin.bottom;
@@ -31,7 +51,6 @@ export default {
       const x = d3.scalePoint().range([0, width]).padding(1);
       const y = {};
 
-      const colorScheme = d3.interpolateTurbo;
       const axis = d3.axisLeft();
 
       let background, foreground;
@@ -56,33 +75,20 @@ export default {
 
       // Extract the list of dimensions and create a scale for each.
       x.domain(
-        (__VM.dimensions = Object.keys(__VM.data.pcdata[0]).filter((d) => {
+        (__VM.dimensions = data.columns.filter((d) => {
           return (
             !d.includes("min") &&
             !d.includes("max") &&
+            !d.includes("isAvg") &&
             (y[d] = d3
               .scaleLinear()
-              .domain(
-                d3.extent(__VM.data.pcdata, function (p) {
-                  return +p[d];
-                })
-              )
-              .range([height, 0]))
+              .domain(d3.extent(data, (p) => +p[d]))
+              .range([height, 10]))
           );
         }))
       );
 
-      let colors = {};
-      Object.keys(__VM.data.pcdata[0]).map((d) => {
-        colors[d] = d3
-          .scaleSequential()
-          .domain(
-            d3.extent(__VM.data.pcdata, function (d) {
-              return +d[name];
-            })
-          )
-          .interpolator(colorScheme);
-      });
+      const color = d3.scaleSequential(d3.interpolateTurbo);
 
       // Add grey background lines for context.
       // eslint-disable-next-line no-unused-vars
@@ -90,19 +96,47 @@ export default {
         .append("g")
         .attr("class", "background")
         .selectAll("path")
-        .data(__VM.data.pcdata)
+        .data(data)
         .enter()
         .append("path")
         .attr("d", path);
 
+      let defs = svg.append("defs");
+
+      // dot for average polylines
+      const avgPolylineDot = (color) => {
+        let id = color.replace(/\D+/g, "");
+        defs
+          .append("marker")
+          .attr("id", id)
+          .attr("viewBox", [0, 0, 20, 20])
+          .attr("refX", 10)
+          .attr("refY", 10)
+          .attr("markerWidth", 4)
+          .attr("markerHeight", 4)
+          .append("circle")
+          .attr("cx", 10)
+          .attr("cy", 10)
+          .attr("r", 10)
+          .style("fill", color);
+
+        return "url(#" + id + ")";
+      };
+
       // Add blue foreground lines for focus.
       foreground = svg
         .append("g")
-        .attr("class", "foreground")
+        // .attr("class", "foreground")
         .selectAll("path")
-        .data(__VM.data.pcdata)
+        .data(data)
         .enter()
         .append("path")
+        .attr("stroke", (d) => (d["isAvg"] ? color(parseInt(d["age_group"]) / 9) : "steelblue"))
+        .attr("stroke-width", (d) => (d["isAvg"] ? "3" : "1"))
+        .attr("fill", "none")
+        .attr("marker-mid", (d) =>
+          d["isAvg"] ? avgPolylineDot(color(parseInt(d["age_group"]) / 9)) : ""
+        )
         .attr("d", path);
 
       // Add a group element for each dimension.
@@ -118,6 +152,9 @@ export default {
       g.append("g")
         .attr("class", "axis")
         .each(function (d) {
+          if (d === "age_group") {
+            axis.ticks(8);
+          }
           d3.select(this).call(axis.scale(y[d]));
         })
         .append("text")
@@ -245,27 +282,5 @@ svg {
   fill-opacity: 0.3;
   stroke: #fff;
   shape-rendering: crispEdges;
-}
-
-.axis line,
-.axis path {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-.axis text {
-  fill: black;
-  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
-  font-size: 1.2rem !important;
-}
-
-.axis .yLabel {
-  font-weight: bolder;
-  font-size: 1.4rem !important;
-}
-
-table {
-  font-size: 0.8rem !important;
 }
 </style>

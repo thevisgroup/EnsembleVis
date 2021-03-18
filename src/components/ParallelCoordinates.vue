@@ -77,7 +77,7 @@ export default {
 
       // Extract the list of dimensions and create a scale for each.
       x.domain(
-        (__VM.dimensions = Object.keys(__VM.data[0]).filter((d) => {
+        (__VM.dimensions = __VM.data.columns.filter((d) => {
           return (
             d !== "Index" &&
             d !== "rrd" &&
@@ -94,7 +94,7 @@ export default {
         }))
       );
 
-      __VM.headers = Object.keys(__VM.data[0]).map((d) => {
+      __VM.headers = __VM.data.columns.map((d) => {
         const res = { key: d, sortable: true };
 
         if (d === "Index") {
@@ -106,7 +106,7 @@ export default {
       });
 
       let colors = {};
-      Object.keys(__VM.data[0]).map((d) => {
+      __VM.data.columns.map((d) => {
         colors[d] = d3
           .scaleSequential()
           .domain(

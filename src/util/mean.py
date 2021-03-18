@@ -11,7 +11,7 @@ header = ['S', 'E', 'H', 'R', 'D']
 col_list = ['iter', 'day', 'age_group'] + header + symptomatic + asymptomatic
 header = header + ['I', 'IS']
 
-for i in range(0, 160):
+for i in range(160):
     dir = f'/Volumes/Travis/UQVis/output_row_{i}'
 
     files = os.listdir(dir)
@@ -26,7 +26,7 @@ for i in range(0, 160):
             df['I'] = df[asymptomatic].sum(axis=1)
 
             print(f'writing simu_{i}')
-            for j in range(0, 8):
+            for j in range(8):
                 # calculate mean, min, max
                 result = df[df['age_group'] == j].groupby(
                     ['day'])[header].agg(['mean', 'min', 'max'])
