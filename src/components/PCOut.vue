@@ -2,7 +2,7 @@
   <div>
     <b-row>
       <b-col cols="10" class="px-0"><div id="parallelCoordinatesOutput"></div></b-col>
-      <b-col cols="2" class="px-0"><div id="parallelCoordinatesOutput_legend"></div></b-col>
+      <b-col cols="2" class="px-0 my-auto"><div id="parallelCoordinatesOutput_legend"></div></b-col>
     </b-row>
   </div>
 </template>
@@ -56,6 +56,8 @@ export default {
 
       let background, foreground;
 
+      d3.selectAll(`#parallelCoordinatesOutput > svg`).remove();
+
       const svg = d3
         .select("#parallelCoordinatesOutput")
         .append("svg")
@@ -69,10 +71,6 @@ export default {
         .attr("preserveAspectRatio", "xMinYMin")
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-      d3.selectAll(
-        `#parallelCoordinatesOutput > svg:not(.pcout_${__VM.data.simulation_selected}_${__VM.data.age_selected})`
-      ).remove();
 
       // Extract the list of dimensions and create a scale for each.
       x.domain(

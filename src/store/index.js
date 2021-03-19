@@ -7,6 +7,7 @@ const options = {
   state: {
     simulation_selected: 0,
     age_selected: 0,
+    show_matrix: false,
   },
   mutations: {},
   getters: {},

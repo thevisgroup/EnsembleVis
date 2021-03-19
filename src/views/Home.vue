@@ -1,49 +1,59 @@
 <template>
   <div class="home">
     <b-container fluid>
+      <div>
+        <b-sidebar
+          id="user-options"
+          title="User Options"
+          backdrop
+          right
+          shadow
+          backdrop-variant="transparent"
+          no-enforce-focus
+        >
+          <template #footer="{ hide }">
+            <div class="d-flex bg-dark text-light px-3 py-2">
+              <b-button size="md" @click="hide" variant="outline-light">Close</b-button>
+            </div>
+          </template>
+
+          <b-card>
+            <b-form>
+              <label for="age_selected">Current Age Group: {{ options.age_selected }}</label>
+              <b-form-input
+                id="age_selected"
+                v-model="options.age_selected"
+                type="range"
+                min="0"
+                max="7"
+                step="1"
+              ></b-form-input>
+
+              <hr />
+
+              <b-form-checkbox v-model="options.show_matrix" id="show_matrix">
+                Show Scatterplot
+              </b-form-checkbox>
+            </b-form>
+          </b-card>
+        </b-sidebar>
+      </div>
+
       <b-row>
         <b-col cols="8">
           <ParallelCoordinates></ParallelCoordinates>
+
+          <PCOut
+            :data="{
+              age_selected: options.age_selected,
+              simulation_selected: options.simulation_selected,
+            }"
+          ></PCOut>
         </b-col>
 
         <b-col cols="4">
           <b-row>
-            <b-col cols="12">
-              <b-card header="User options">
-                <b-form>
-                  <!-- <b-form-group label="Age Group" label-for="select_age">
-                    <b-form-select
-                      id="select_age"
-                      v-model="options.age_selected"
-                      :options="generateAge()"
-                    ></b-form-select>
-                  </b-form-group> -->
-
-                  <label for="age_selected">Show Age Group: {{ options.age_selected }}</label>
-                  <b-form-input
-                    id="age_selected"
-                    v-model="options.age_selected"
-                    type="range"
-                    min="0"
-                    max="7"
-                    step="1"
-                  ></b-form-input>
-
-                  <b-form-checkbox v-model="show_matrix" id="show_matrix">
-                    Show Scatterplot
-                  </b-form-checkbox>
-                  <!-- <label for="select_iter">Day: {{ day_selected }}</label>
-                  <b-form-input
-                    id="select_iday"
-                    v-model="day_selected"
-                    type="range"
-                    min="1"
-                    max="200"
-                    step="1"
-                  ></b-form-input> -->
-                </b-form>
-              </b-card>
-            </b-col>
+            <b-col cols="12"> </b-col>
           </b-row>
 
           <b-row class="mt-2">
@@ -54,29 +64,18 @@
                   simulation_selected: options.simulation_selected,
                 }"
               ></LineChart>
+
+              <Umap
+                :data="{
+                  age_selected: options.age_selected,
+                  simulation_selected: options.simulation_selected,
+                }"
+              ></Umap>
             </b-col>
           </b-row>
         </b-col>
       </b-row>
-      <b-row>
-        <b-col cols="9">
-          <PCOut
-            :data="{
-              age_selected: options.age_selected,
-              simulation_selected: options.simulation_selected,
-            }"
-          ></PCOut>
-        </b-col>
-        <b-col cols="3">
-          <Umap
-            :data="{
-              age_selected: options.age_selected,
-              simulation_selected: options.simulation_selected,
-            }"
-          ></Umap>
-        </b-col>
-      </b-row>
-      <b-row v-if="show_matrix">
+      <b-row v-if="options.show_matrix">
         <Matrix></Matrix>
       </b-row>
     </b-container>
@@ -86,9 +85,7 @@
 import { mapState } from "vuex";
 export default {
   data() {
-    return {
-      show_matrix: false,
-    };
+    return {};
   },
   methods: {
     generateAge() {
