@@ -1,6 +1,9 @@
 <template>
   <div>
-    <div id="parallelCoordinatesOutput"></div>
+    <b-row>
+      <b-col cols="10" class="px-0"><div id="parallelCoordinatesOutput"></div></b-col>
+      <b-col cols="2" class="px-0"><div id="parallelCoordinatesOutput_legend"></div></b-col>
+    </b-row>
   </div>
 </template>
 
@@ -34,17 +37,15 @@ export default {
       __VM.data.pcdata.columns.unshift("age_group");
       __VM.data.pcdata.forEach((i) => (i["age_group"] = __VM.data.age_selected));
 
-      // add isAvg for highlighting
+      // add type for highlighting
       // eslint-disable-next-line vue/no-mutating-props
-      __VM.data.pcdata.columns.push("isAvg");
-      __VM.data.pcdata.forEach((i) => (i["isAvg"] = false));
-      avgPolylines.columns.push("isAvg");
-      avgPolylines.forEach((i) => (i["isAvg"] = true));
+      __VM.data.pcdata.columns.push("type");
+      __VM.data.pcdata.forEach((i) => (i["type"] = "data"));
 
       const data = [...__VM.data.pcdata, ...avgPolylines];
       data.columns = avgPolylines.columns;
 
-      const margin = { top: 30, right: -100, bottom: 10, left: -100 };
+      const margin = { top: 30, right: -50, bottom: 10, left: -50 };
       const width = window.innerWidth - margin.left - margin.right;
       const height = window.innerHeight / 1.5 - margin.top - margin.bottom;
 
@@ -63,7 +64,7 @@ export default {
         .attr("height", "100%")
         .attr(
           "viewBox",
-          `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`
+          `0 0 ${width + margin.left * 3 + margin.right} ${height + margin.top + margin.bottom}`
         )
         .attr("preserveAspectRatio", "xMinYMin")
         .append("g")
@@ -79,7 +80,7 @@ export default {
           return (
             !d.includes("min") &&
             !d.includes("max") &&
-            !d.includes("isAvg") &&
+            !d.includes("type") &&
             (y[d] = d3
               .scaleLinear()
               .domain(d3.extent(data, (p) => +p[d]))
@@ -131,12 +132,57 @@ export default {
         .data(data)
         .enter()
         .append("path")
-        .attr("stroke", (d) => (d["isAvg"] ? color(parseInt(d["age_group"]) / 9) : "steelblue"))
-        .attr("stroke-width", (d) => (d["isAvg"] ? "3" : "1"))
+        .attr("stroke", (d) => {
+          switch (d["type"]) {
+            case "data":
+              return "steelblue";
+            case "average":
+              return color(parseInt(d["age_group"]) / 9);
+            case "std":
+              return "#FF0000";
+            case "aoa":
+              return "#FF0000";
+            default:
+              break;
+          }
+        })
+        .attr("stroke-width", (d) => {
+          switch (d["type"]) {
+            case "data":
+              return 1;
+            case "average":
+              return 2;
+            case "std":
+              return 3;
+            case "aoa":
+              return 3;
+            default:
+              break;
+          }
+        })
         .attr("fill", "none")
-        .attr("marker-mid", (d) =>
-          d["isAvg"] ? avgPolylineDot(color(parseInt(d["age_group"]) / 9)) : ""
-        )
+        .attr("marker-mid", (d) => {
+          switch (d["type"]) {
+            case "data":
+              return "";
+            case "average":
+              return avgPolylineDot(color(parseInt(d["age_group"]) / 9));
+            case "std":
+              return avgPolylineDot("#FF0000");
+            default:
+              break;
+          }
+        })
+        .attr("stroke-dasharray", (d) => {
+          switch (d["type"]) {
+            case "std":
+              return "2 5";
+            case "aoa":
+              return "8 10";
+            default:
+              break;
+          }
+        })
         .attr("d", path);
 
       // Add a group element for each dimension.
@@ -233,6 +279,62 @@ export default {
 
         return Promise.resolve();
       }
+
+      // interactive legends
+
+      var table = d3
+        .select("#parallelCoordinatesOutput_legend")
+        .html("")
+        .selectAll(".row")
+        .data(avgPolylines)
+        .enter()
+        .append("div");
+      // .on("mouseover", highlight)
+      // .on("mouseout", unhighlight);
+
+      table
+        .append("span")
+        .attr("class", (d) => {
+          switch (d["type"]) {
+            case "average":
+              return "legend-";
+            case "std":
+              return "legend-std";
+            case "aoa":
+              return "legend-aoa";
+            default:
+              break;
+          }
+        })
+        .style("background", (d) => {
+          switch (d["type"]) {
+            case "data":
+              return "";
+            case "average":
+              return color(parseInt(d["age_group"]) / 9);
+            // case "std":
+            //   return "#FF0000";
+            // case "aoa":
+            //   return "#FF0000";
+            default:
+              break;
+          }
+        });
+
+      table.append("span").text(function (d) {
+        switch (d["type"]) {
+          case "data":
+            return "";
+          case "average":
+            return "μ of group " + d["age_group"];
+          case "std":
+            return "σ Standard Deviation";
+          case "aoa":
+            return "μ of all groups";
+          default:
+            break;
+        }
+      });
     },
   },
   async mounted() {
@@ -282,5 +384,26 @@ svg {
   fill-opacity: 0.3;
   stroke: #fff;
   shape-rendering: crispEdges;
+}
+
+.legend- {
+  display: inline-block;
+  height: 15px;
+  width: 15px;
+  margin: 4px 4px -2px 0px;
+}
+
+.legend-aoa {
+  display: inline-block;
+  margin: 0px 4px 4px 0px;
+  width: 15px;
+  border-bottom: 2px dashed #ff0000;
+}
+
+.legend-std {
+  display: inline-block;
+  margin: 0px 4px 4px 0px;
+  width: 15px;
+  border-bottom: 2px dotted #ff0000;
 }
 </style>

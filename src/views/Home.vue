@@ -59,7 +59,7 @@
         </b-col>
       </b-row>
       <b-row>
-        <b-col cols="8">
+        <b-col cols="9">
           <PCOut
             :data="{
               age_selected: options.age_selected,
@@ -67,7 +67,7 @@
             }"
           ></PCOut>
         </b-col>
-        <b-col cols="4">
+        <b-col cols="3">
           <Umap
             :data="{
               age_selected: options.age_selected,
