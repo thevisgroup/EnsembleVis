@@ -12,14 +12,6 @@ import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 Vue.use(BootstrapVueIcons);
 
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faChevronUp, faChevronDown, faMars, faVenus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-
-library.add(faChevronUp, faChevronDown, faMars, faVenus);
-
-Vue.component("icon", FontAwesomeIcon);
-
 import ParallelCoordinates from "./components/ParallelCoordinates.vue";
 Vue.component("ParallelCoordinates", ParallelCoordinates);
 
