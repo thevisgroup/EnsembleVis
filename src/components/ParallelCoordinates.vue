@@ -7,7 +7,7 @@
       sticky-header
       :items="tableData"
       :fields="headers"
-      sort-by.sync="Index"
+      :sort-by.sync="sortBy"
       sort-desc.sync="false"
       responsive="sm"
     >
@@ -20,6 +20,23 @@
         >
           {{ row.item.Index }}
         </b-button>
+      </template>
+
+      <template #head()="data">
+        <span :class="getTableHeaderClass(data.field.key)">{{ data.field.key }}</span>
+      </template>
+
+      <template #cell()="data">
+        <b-progress
+          :max="1"
+          :value="data.value / input_meta[2][data.field.key]"
+          :variant="getBarVariant(data.value / input_meta[2][data.field.key])"
+          :id="`b-progress-${data.item.Index + data.field.key}`"
+        >
+        </b-progress>
+        <b-tooltip :target="`b-progress-${data.item.Index + data.field.key}`">
+          {{ data.value }}
+        </b-tooltip>
       </template>
     </b-table>
   </div>
@@ -41,6 +58,8 @@ export default {
       data: null,
       tableData: [],
       headers: [],
+      input_meta: null,
+      sortBy: "Index",
     };
   },
   methods: {
@@ -50,6 +69,9 @@ export default {
       d3.selectAll("#parallelCoordinates > svg").remove();
 
       __VM.data = await d3.csv("/assets/posterior_parameters.csv", d3.autoType);
+
+      __VM.input_meta = await d3.csv("/assets/posterior_parameters_meta.csv", d3.autoType);
+
       const margin = { top: 30, right: -100, bottom: 10, left: -100 };
       const width = window.innerWidth - margin.left - margin.right;
       const height = window.innerHeight / 1.5 - margin.top - margin.bottom;
@@ -80,8 +102,6 @@ export default {
         (__VM.dimensions = __VM.data.columns.filter((d) => {
           return (
             d !== "Index" &&
-            d !== "rrd" &&
-            d !== "K" &&
             (y[d] = d3
               .scaleLinear()
               .domain(
@@ -101,7 +121,6 @@ export default {
           res.variant = "secondary";
           res.stickyColumn = true;
         }
-
         return res;
       });
 
@@ -234,6 +253,25 @@ export default {
           : (__VM.tableData = __VM.data.slice(0, __VM.rowsToDisplay));
 
         return Promise.resolve();
+      }
+    },
+
+    getBarVariant(data) {
+      if (data > 0.75) {
+        return "success";
+      } else if (data > 0.5) {
+        return "primary";
+      } else if (data > 0.25) {
+        return "warning";
+      } else {
+        return "danger";
+      }
+    },
+    getTableHeaderClass(column) {
+      if (column === this.sortBy) {
+        return "text-danger";
+      } else {
+        return "text";
       }
     },
   },
