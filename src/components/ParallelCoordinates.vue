@@ -27,12 +27,17 @@
       </template>
 
       <template #cell()="data">
-        <b-progress
-          :max="1"
-          :value="data.value / input_meta[2][data.field.key]"
-          :variant="getBarVariant(data.value / input_meta[2][data.field.key])"
-          :id="`b-progress-${data.item.Index + data.field.key}`"
-        >
+        <div v-if="options.table.showAvgLine" class="bar-step" style="left: 50%">
+          <div class="label-line"></div>
+        </div>
+        <b-progress max="1" :id="`b-progress-${data.item.Index + data.field.key}`">
+          <b-progress-bar
+            :value="data.value / input_meta[2][data.field.key]"
+            :variant="getBarVariant(data.value / input_meta[2][data.field.key])"
+            :striped="data.field.key === sortBy"
+            :animated="data.field.key === sortBy"
+          >
+          </b-progress-bar>
         </b-progress>
         <b-tooltip :target="`b-progress-${data.item.Index + data.field.key}`">
           {{ data.value }}
@@ -259,9 +264,9 @@ export default {
     getBarVariant(data) {
       if (data > 0.75) {
         return "success";
-      } else if (data > 0.5) {
+      } else if (data >= 0.5) {
         return "primary";
-      } else if (data > 0.25) {
+      } else if (data >= 0.25) {
         return "warning";
       } else {
         return "danger";
@@ -333,5 +338,17 @@ svg {
 
 table {
   font-size: 0.8rem !important;
+}
+
+.bar-step {
+  position: relative;
+}
+
+.label-line {
+  position: absolute;
+  background: #000;
+  height: 1rem;
+  width: 2px;
+  margin-left: -1px;
 }
 </style>

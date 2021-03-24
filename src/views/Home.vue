@@ -34,6 +34,10 @@
               <b-form-checkbox v-model="options.show_matrix" id="show_matrix">
                 Show Scatterplot
               </b-form-checkbox>
+
+              <b-form-checkbox v-model="options.table.showAvgLine" id="options.table.showAvgLine">
+                Show Average Marker
+              </b-form-checkbox>
             </b-form>
           </b-card>
         </b-sidebar>

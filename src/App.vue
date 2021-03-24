@@ -25,6 +25,13 @@
               Show Scatterplot
             </b-checkbox>
           </li>
+
+          <li class="my-auto ml-3">
+            <b-checkbox v-model="options.table.showAvgLine" id="showAvgLine">
+              Show Average Marker
+            </b-checkbox>
+          </li>
+
           <li class="my-auto ml-5">
             <b-button v-b-toggle.user-options>Option Sidebar</b-button>
           </li>
