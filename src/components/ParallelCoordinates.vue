@@ -2,8 +2,10 @@
   <div>
     <div id="parallelCoordinates"></div>
     <b-table
+      id="inputTable"
       striped
       hover
+      fixed
       sticky-header
       :items="tableData"
       :fields="headers"
@@ -13,7 +15,7 @@
     >
       <template #cell(Index)="row">
         <b-button
-          size="sm"
+          size="xs"
           :variant="options.simulation_selected === row.item.Index ? 'primary' : 'secondary'"
           @click="options.simulation_selected = row.item.Index"
           class="mr-2"
@@ -32,14 +34,22 @@
         </div>
         <b-progress max="1" :id="`b-progress-${data.item.Index + data.field.key}`">
           <b-progress-bar
-            :value="data.value / input_meta[2][data.field.key]"
+            :value="getBarValue(data.value / input_meta[2][data.field.key], true)"
+            variant="empty"
+          >
+          </b-progress-bar>
+          <b-progress-bar
+            :value="getBarValue(data.value / input_meta[2][data.field.key], false)"
             :variant="getBarVariant(data.value / input_meta[2][data.field.key])"
             :striped="data.field.key === sortBy"
             :animated="data.field.key === sortBy"
           >
           </b-progress-bar>
         </b-progress>
-        <b-tooltip :target="`b-progress-${data.item.Index + data.field.key}`">
+        <b-tooltip
+          :target="`b-progress-${data.item.Index + data.field.key}`"
+          placement="rightbottom"
+        >
           {{ data.value }}
         </b-tooltip>
       </template>
@@ -272,6 +282,14 @@ export default {
         return "danger";
       }
     },
+
+    getBarValue(data, isOnTheLeft) {
+      if (data > 0.5) {
+        return isOnTheLeft ? 0.5 : data - 0.5;
+      } else if (data <= 0.5) {
+        return isOnTheLeft ? 0.5 - data : data;
+      }
+    },
     getTableHeaderClass(column) {
       if (column === this.sortBy) {
         return "text-danger";
@@ -350,5 +368,21 @@ table {
   height: 1rem;
   width: 2px;
   margin-left: -1px;
+}
+
+/* empty bar hack */
+.bg-empty {
+  background-color: #e9ecef;
+}
+
+/* xs button for table */
+.btn-xs {
+  padding: 0.1rem 0.3rem;
+  font-size: 0.6rem;
+}
+
+/* special table padding */
+#inputTable td {
+  padding: 0rem 0.3rem !important;
 }
 </style>
