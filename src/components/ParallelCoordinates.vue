@@ -40,7 +40,7 @@
           </b-progress-bar>
           <b-progress-bar
             :value="getBarValue(data.value / input_meta[2][data.field.key], false)"
-            :variant="getBarVariant(data.value / input_meta[2][data.field.key])"
+            :style="getBarVariant(data.value / input_meta[2][data.field.key])"
             :striped="data.field.key === sortBy"
             :animated="data.field.key === sortBy"
           >
@@ -60,6 +60,8 @@
 <script>
 import * as d3 from "d3";
 import { mapState } from "vuex";
+
+const tableColor = d3.scaleSequential(d3.interpolatePRGn);
 
 export default {
   name: "ParallelCoordinates",
@@ -95,6 +97,7 @@ export default {
       const y = {};
 
       const colorScheme = d3.interpolateTurbo;
+
       const axis = d3.axisLeft();
 
       let background, foreground;
@@ -272,15 +275,16 @@ export default {
     },
 
     getBarVariant(data) {
-      if (data > 0.75) {
-        return "success";
-      } else if (data >= 0.5) {
-        return "primary";
-      } else if (data >= 0.25) {
-        return "warning";
-      } else {
-        return "danger";
-      }
+      return `background-color: ${tableColor(data)};`;
+      // if (data > 0.75) {
+      //   return "success";
+      // } else if (data >= 0.5) {
+      //   return "primary";
+      // } else if (data >= 0.25) {
+      //   return "warning";
+      // } else {
+      //   return "danger";
+      // }
     },
 
     getBarValue(data, isOnTheLeft) {
