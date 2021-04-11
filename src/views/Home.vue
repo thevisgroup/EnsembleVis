@@ -69,12 +69,18 @@
                 }"
               ></LineChart>
 
-              <Umap
+              <!-- <Umap
                 :data="{
                   age_selected: options.age_selected,
                   simulation_selected: options.simulation_selected,
                 }"
-              ></Umap>
+              ></Umap> -->
+
+              <PCA
+                :data="{
+                  age_selected: options.age_selected,
+                }"
+              ></PCA>
             </b-col>
           </b-row>
         </b-col>
@@ -87,9 +93,14 @@
 </template>
 <script>
 import { mapState } from "vuex";
+import PCA from "../components/PCA.vue";
+
 export default {
   data() {
     return {};
+  },
+  components: {
+    PCA,
   },
   methods: {
     generateAge() {

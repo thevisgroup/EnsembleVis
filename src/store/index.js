@@ -10,6 +10,8 @@ const options = {
     show_matrix: false,
     table: {
       showAvgLine: true,
+      initData: [],
+      data: [],
     },
   },
   mutations: {},

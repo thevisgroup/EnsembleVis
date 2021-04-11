@@ -7,7 +7,7 @@
       hover
       fixed
       sticky-header
-      :items="tableData"
+      :items="options.table.data"
       :fields="headers"
       :sort-by.sync="sortBy"
       sort-desc.sync="false"
@@ -72,8 +72,6 @@ export default {
     return {
       rowsToDisplay: 160,
       dimensions: [],
-      data: null,
-      tableData: [],
       headers: [],
       input_meta: null,
       sortBy: "Index",
@@ -85,7 +83,7 @@ export default {
 
       d3.selectAll("#parallelCoordinates > svg").remove();
 
-      __VM.data = await d3.csv("/assets/posterior_parameters.csv", d3.autoType);
+      __VM.options.table.initData = await d3.csv("/assets/posterior_parameters.csv", d3.autoType);
 
       __VM.input_meta = await d3.csv("/assets/posterior_parameters_meta.csv", d3.autoType);
 
@@ -117,13 +115,13 @@ export default {
 
       // Extract the list of dimensions and create a scale for each.
       x.domain(
-        (__VM.dimensions = __VM.data.columns.filter((d) => {
+        (__VM.dimensions = __VM.options.table.initData.columns.filter((d) => {
           return (
             d !== "Index" &&
             (y[d] = d3
               .scaleLinear()
               .domain(
-                d3.extent(__VM.data, function (p) {
+                d3.extent(__VM.options.table.initData, function (p) {
                   return +p[d];
                 })
               )
@@ -132,7 +130,7 @@ export default {
         }))
       );
 
-      __VM.headers = __VM.data.columns.map((d) => {
+      __VM.headers = __VM.options.table.initData.columns.map((d) => {
         const res = { key: d, sortable: true };
 
         if (d === "Index") {
@@ -143,11 +141,11 @@ export default {
       });
 
       let colors = {};
-      __VM.data.columns.map((d) => {
+      __VM.options.table.initData.columns.map((d) => {
         colors[d] = d3
           .scaleSequential()
           .domain(
-            d3.extent(__VM.data, function (d) {
+            d3.extent(__VM.options.table.initData, function (d) {
               return +d[name];
             })
           )
@@ -160,7 +158,7 @@ export default {
         .append("g")
         .attr("class", "background")
         .selectAll("path")
-        .data(__VM.data)
+        .data(__VM.options.table.initData)
         .enter()
         .append("path")
         .attr("d", path);
@@ -170,7 +168,7 @@ export default {
         .append("g")
         .attr("class", "foreground")
         .selectAll("path")
-        .data(__VM.data)
+        .data(__VM.options.table.initData)
         .enter()
         .append("path")
         .attr("d", path);
@@ -207,8 +205,8 @@ export default {
                 [-10, 0],
                 [10, height],
               ])
-              .on("brush", brush)
-              .on("end", brush))
+              .on("brush", brushStart)
+              .on("end", brushEnd))
           );
         })
         .selectAll("rect")
@@ -225,11 +223,13 @@ export default {
         return res;
       }
 
-      __VM.tableData = __VM.data.slice(0, __VM.rowsToDisplay);
+      __VM.options.table.data = __VM.options.table.initData;
 
+      let display = [];
+      let actives = [];
       // Handles a brush event, toggling the display of foreground lines.
       function brush() {
-        const actives = [];
+        actives = [];
         svg
           .selectAll(".brush")
           .filter(function (d) {
@@ -259,39 +259,37 @@ export default {
             : "none";
         });
 
-        const display = [];
+        display = [];
         local_selected.forEach((l) => {
           if (local_selected.filter((s) => s.Index === l.Index).length === actives.length) {
             display.push(l);
           }
         });
+      }
 
+      function brushStart() {
+        brush();
+      }
+
+      function brushEnd() {
+        brush();
+
+        // refresh table on brushEnd
         actives.length > 0
-          ? (__VM.tableData = [...new Set(display)].slice(0, __VM.rowsToDisplay))
-          : (__VM.tableData = __VM.data.slice(0, __VM.rowsToDisplay));
-
-        return Promise.resolve();
+          ? (__VM.options.table.data = [...new Set(display)])
+          : (__VM.options.table.data = __VM.options.table.initData);
       }
     },
 
     getBarVariant(data) {
       return `background-color: ${tableColor(data)};`;
-      // if (data > 0.75) {
-      //   return "success";
-      // } else if (data >= 0.5) {
-      //   return "primary";
-      // } else if (data >= 0.25) {
-      //   return "warning";
-      // } else {
-      //   return "danger";
-      // }
     },
 
     getBarValue(data, isOnTheLeft) {
       if (data > 0.5) {
         return isOnTheLeft ? 0.5 : data - 0.5;
       } else if (data <= 0.5) {
-        return isOnTheLeft ? 0.5 - data : data;
+        return isOnTheLeft ? data : 0.5 - data;
       }
     },
     getTableHeaderClass(column) {
