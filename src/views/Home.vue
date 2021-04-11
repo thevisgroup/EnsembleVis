@@ -76,11 +76,12 @@
                 }"
               ></Umap> -->
 
-              <PCA
+              <!-- <PCA
                 :data="{
                   age_selected: options.age_selected,
                 }"
-              ></PCA>
+              ></PCA> -->
+              <PCA></PCA>
             </b-col>
           </b-row>
         </b-col>

@@ -30,7 +30,12 @@ export default {
       //   d3.autoType
       // );
 
-      __VM.PCAdata = await d3.csv(`/assets/data/output/pca/d/age.csv`, d3.autoType);
+      __VM.PCAdata = await d3.csv(`/assets/data/output/pca/d/age_mean.csv`, d3.autoType);
+
+      const yMin = d3.min(__VM.PCAdata, (d) => d.y);
+      const yMax = d3.max(__VM.PCAdata, (d) => d.y);
+
+      const colorScale = yMax + Math.abs(yMin);
 
       const margin = { top: 30, right: 30, bottom: 30, left: 30 };
       const width = window.innerWidth / 3 - margin.left - margin.right;
@@ -46,7 +51,8 @@ export default {
           `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`
         )
         .attr("preserveAspectRatio", "xMinYMin")
-        .append("g");
+        .append("g")
+        .attr("transform", `translate(0,${margin.top})`);
 
       // eslint-disable-next-line no-unused-vars
       const color = d3.scaleSequential(d3.interpolateTurbo);
@@ -83,9 +89,15 @@ export default {
         .attr("transform", (d) => `translate(${x(d["x"])},${y(d["y"])})`)
         // .attr("fill", color(parseInt(__VM.data.age_selected) + 1 / 9))
         .attr("fill", (d) =>
-          d.age_group === parseInt(__VM.data.age_selected) ? "rgb(8, 82, 35)" : "#e3e3e3"
+          d.y >= 0
+            ? color((d.y + Math.abs(yMin)) / colorScale)
+            : color(Math.abs(yMin - d.y) / colorScale)
         )
-        .attr("fill-opacity", (d) => (d.age_group === parseInt(__VM.data.age_selected) ? 1 : 0.8))
+        // for aggregated age_group
+        // .attr("fill", (d) =>
+        //   d.age_group === parseInt(__VM.data.age_selected) ? "rgb(8, 82, 35)" : "#e3e3e3"
+        // )
+        // .attr("fill-opacity", (d) => (d.age_group === parseInt(__VM.data.age_selected) ? 1 : 0.8))
         .attr("r", 3);
 
       svg.append("g").call(xAxis);
@@ -119,9 +131,11 @@ export default {
       function brushEnd({ selection }) {
         brusher({ selection });
 
-        selected = selected
-          .filter((s) => s.age_group === parseInt(__VM.data.age_selected))
-          .map((d) => d.simu);
+        // selected = selected
+        //   .filter((s) => s.age_group === parseInt(__VM.data.age_selected))
+        //   .map((d) => d.simu);
+
+        selected = selected.map((d) => d.simu);
 
         if (selected.length > 0) {
           __VM.options.table.data = __VM.options.table.initData.filter((s) =>
@@ -139,14 +153,14 @@ export default {
     const __VM = this;
     await __VM.load();
   },
-  watch: {
-    data: {
-      deep: true,
-      handler: function () {
-        this.load();
-      },
-    },
-  },
+  // watch: {
+  //   data: {
+  //     deep: true,
+  //     handler: function () {
+  //       this.load();
+  //     },
+  //   },
+  // },
 };
 </script>
 
