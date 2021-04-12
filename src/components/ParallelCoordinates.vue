@@ -325,7 +325,7 @@ export default {
       let sortedKeys = Object.keys(
         Object.fromEntries(
           Object.entries(row.item).sort(([k1, v1], [k2, v2]) => {
-            return v2 / __VM.input_meta[2][k2] - v1 / __VM.input_meta[2][k1];
+            return v1 / __VM.input_meta[2][k1] - v2 / __VM.input_meta[2][k2];
           })
         )
       );
