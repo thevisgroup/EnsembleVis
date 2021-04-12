@@ -16,8 +16,8 @@
       <template #cell(Index)="row">
         <b-button
           size="xs"
-          :variant="getIndexVariant(row.item.Index)"
-          @click="clickHeader(row)"
+          :variant="options.simulation_selected === row.item.Index ? 'primary' : 'secondary'"
+          @click="clickHeader(row.item)"
           class="mr-2"
         >
           {{ row.item.Index }}
@@ -281,6 +281,8 @@ export default {
           ? (__VM.options.table.selectedRows = [...new Set(display)])
           : (__VM.options.table.selectedRows = __VM.options.table.initData);
       }
+
+      __VM.clickHeader(__VM.options.table.initData[0]);
     },
 
     getBarVariant(data) {
@@ -289,6 +291,7 @@ export default {
 
     getIndexVariant(index) {
       const __VM = this;
+
       if (__VM.options.simulation_selected === index) {
         return "primary";
       }
@@ -314,17 +317,18 @@ export default {
         return "text";
       }
     },
-    clickHeader(row) {
+    clickHeader(item) {
+      console.log(item);
       const __VM = this;
 
-      __VM.options.simulation_selected = row.item.Index;
+      __VM.options.simulation_selected = item.Index;
 
-      let columns = Object.create(row.item);
+      let columns = Object.create(item);
       delete columns.Index;
 
       let sortedKeys = Object.keys(
         Object.fromEntries(
-          Object.entries(row.item).sort(([k1, v1], [k2, v2]) => {
+          Object.entries(item).sort(([k1, v1], [k2, v2]) => {
             return v1 / __VM.input_meta[2][k1] - v2 / __VM.input_meta[2][k2];
           })
         )
@@ -342,9 +346,17 @@ export default {
         sortable: true,
         stickyColumn: true,
         variant: "secondary",
+        tdClass: (v) => __VM.getTableIndexBackground(v),
       });
 
       __VM.headers = newHeaders;
+    },
+    getTableIndexBackground(v) {
+      if (this.isRowSelected(v)) {
+        return "table-danger";
+      } else {
+        return "table-secondary";
+      }
     },
   },
   async mounted() {
