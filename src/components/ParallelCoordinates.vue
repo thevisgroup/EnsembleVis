@@ -17,7 +17,7 @@
         <b-button
           size="xs"
           :variant="options.simulation_selected === row.item.Index ? 'primary' : 'secondary'"
-          @click="options.simulation_selected = row.item.Index"
+          @click="clickHeader(row)"
           class="mr-2"
         >
           {{ row.item.Index }}
@@ -298,6 +298,30 @@ export default {
       } else {
         return "text";
       }
+    },
+    clickHeader(row) {
+      const __VM = this;
+
+      __VM.options.simulation_selected = row.item.Index;
+
+      let columns = Object.create(row.item);
+      delete columns.Index;
+
+      let sortedKeys = Object.keys(
+        Object.fromEntries(
+          Object.entries(row.item).sort(([k1, v1], [k2, v2]) => {
+            return v2 / __VM.input_meta[2][k2] - v1 / __VM.input_meta[2][k1];
+          })
+        )
+      );
+
+      sortedKeys.unshift("Index");
+
+      let newHeaders = sortedKeys.map((k) => {
+        return { key: k, sortable: true };
+      });
+
+      __VM.headers = newHeaders;
     },
   },
   async mounted() {
