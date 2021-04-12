@@ -72,7 +72,7 @@ export default {
       const y = d3
         .scaleLinear()
         .domain(d3.extent(__VM.PCAdata, (d) => d["y"]))
-        .range([height, 0]);
+        .range([height, margin.top / 2]);
 
       const yAxis = (g) =>
         g
