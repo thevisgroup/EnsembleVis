@@ -20,7 +20,14 @@
               step="1"
             ></b-input>
           </li>
+
           <li class="my-auto">
+            <b-checkbox v-model="options.show_selected_rows_only" id="show_selected_rows_only">
+              Show Selected Rows Only
+            </b-checkbox>
+          </li>
+
+          <li class="my-auto ml-3">
             <b-checkbox v-model="options.show_matrix" id="show_matrix">
               Show Scatterplot
             </b-checkbox>

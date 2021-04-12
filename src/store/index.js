@@ -11,11 +11,15 @@ const options = {
     table: {
       showAvgLine: true,
       initData: [],
-      data: [],
+      selectedRows: [],
     },
   },
   mutations: {},
-  getters: {},
+  getters: {
+    isRowSelected: (state) => (id) => {
+      return state.table.selectedRows.filter((d) => d.Index === id).length > 0;
+    },
+  },
 };
 
 export default new Vuex.Store({

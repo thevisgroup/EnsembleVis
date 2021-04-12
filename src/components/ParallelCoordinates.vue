@@ -7,7 +7,7 @@
       hover
       fixed
       sticky-header
-      :items="options.table.data"
+      :items="options.show_selected_rows_only ? options.table.selectedRows : options.table.initData"
       :fields="headers"
       :sort-by.sync="sortBy"
       sort-desc.sync="false"
@@ -16,7 +16,7 @@
       <template #cell(Index)="row">
         <b-button
           size="xs"
-          :variant="options.simulation_selected === row.item.Index ? 'primary' : 'secondary'"
+          :variant="getIndexVariant(row.item.Index)"
           @click="clickHeader(row)"
           class="mr-2"
         >
@@ -59,7 +59,7 @@
 
 <script>
 import * as d3 from "d3";
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 
 const tableColor = d3.scaleSequential(d3.interpolatePRGn);
 
@@ -67,6 +67,7 @@ export default {
   name: "ParallelCoordinates",
   computed: {
     ...mapState(["options"]),
+    ...mapGetters("options", ["isRowSelected"]),
   },
   data() {
     return {
@@ -223,7 +224,7 @@ export default {
         return res;
       }
 
-      __VM.options.table.data = __VM.options.table.initData;
+      __VM.options.table.selectedRows = __VM.options.table.initData;
 
       let display = [];
       let actives = [];
@@ -276,13 +277,26 @@ export default {
 
         // refresh table on brushEnd
         actives.length > 0
-          ? (__VM.options.table.data = [...new Set(display)])
-          : (__VM.options.table.data = __VM.options.table.initData);
+          ? (__VM.options.table.selectedRows = [...new Set(display)])
+          : (__VM.options.table.selectedRows = __VM.options.table.initData);
       }
     },
 
     getBarVariant(data) {
       return `background-color: ${tableColor(data)};`;
+    },
+
+    getIndexVariant(index) {
+      const __VM = this;
+      if (__VM.options.simulation_selected === index) {
+        return "primary";
+      }
+
+      if (__VM.isRowSelected(index)) {
+        return "danger";
+      } else {
+        return "secondary";
+      }
     },
 
     getBarValue(data, isOnTheLeft) {
@@ -315,10 +329,18 @@ export default {
         )
       );
 
-      sortedKeys.unshift("Index");
-
       let newHeaders = sortedKeys.map((k) => {
-        return { key: k, sortable: true };
+        return {
+          key: k,
+          sortable: true,
+        };
+      });
+
+      newHeaders.unshift({
+        key: "Index",
+        sortable: true,
+        stickyColumn: true,
+        variant: "secondary",
       });
 
       __VM.headers = newHeaders;

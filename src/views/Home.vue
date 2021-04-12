@@ -31,6 +31,13 @@
 
               <hr />
 
+              <b-form-checkbox
+                v-model="options.show_selected_rows_only"
+                id="show_selected_rows_only"
+              >
+                Show Selected Rows Only
+              </b-form-checkbox>
+
               <b-form-checkbox v-model="options.show_matrix" id="show_matrix">
                 Show Scatterplot
               </b-form-checkbox>

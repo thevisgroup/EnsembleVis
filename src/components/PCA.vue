@@ -138,11 +138,11 @@ export default {
         selected = selected.map((d) => d.simu);
 
         if (selected.length > 0) {
-          __VM.options.table.data = __VM.options.table.initData.filter((s) =>
+          __VM.options.table.selectedRows = __VM.options.table.initData.filter((s) =>
             selected.includes(s.Index)
           );
         } else {
-          __VM.options.table.data = __VM.options.table.initData;
+          __VM.options.table.selectedRows = __VM.options.table.initData;
         }
       }
 
