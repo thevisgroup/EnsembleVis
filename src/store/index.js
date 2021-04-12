@@ -8,6 +8,7 @@ const options = {
     simulation_selected: 0,
     age_selected: 0,
     show_matrix: false,
+    show_selected_rows_only: false,
     table: {
       showAvgLine: true,
       initData: [],

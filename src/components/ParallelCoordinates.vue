@@ -251,7 +251,8 @@ export default {
           return actives.every(function (active) {
             let result =
               active.extent[1] <= d[active.dimension] && d[active.dimension] <= active.extent[0];
-            if (result) {
+
+            if (result || __VM.options.simulation_selected === d.Index) {
               local_selected.push(d);
             }
             return result;
