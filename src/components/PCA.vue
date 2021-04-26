@@ -20,7 +20,7 @@ export default {
     };
   },
   methods: {
-    async load() {
+    async init() {
       const __VM = this;
 
       d3.selectAll("#PCA > svg").remove();
@@ -80,7 +80,7 @@ export default {
           .call(d3.axisLeft(y).ticks(20))
           .call((g) => g.select(".domain").remove())
           .call((g) => g.selectAll(".tick line").attr("stroke", "#ddd"));
-
+      console.log(__VM.options.table.selectedRows);
       const dot = svg
         .append("g")
         .selectAll("circle")
@@ -93,6 +93,11 @@ export default {
             ? color((d.y + Math.abs(yMin)) / colorScale)
             : color(Math.abs(yMin - d.y) / colorScale)
         )
+        .attr("class", (d) => {
+          if (!__VM.options.table.selectedRows.some((x) => x.Index === d.simu)) {
+            return "hidden";
+          }
+        })
         // for aggregated age_group
         // .attr("fill", (d) =>
         //   d.age_group === parseInt(__VM.data.age_selected) ? "rgb(8, 82, 35)" : "#e3e3e3"
@@ -144,23 +149,24 @@ export default {
         } else {
           __VM.options.table.selectedRows = __VM.options.table.initData;
         }
+
+        // trigger PCP redraw
+        __VM.options.pcp.count++;
       }
 
       return Promise.resolve();
     },
   },
   async mounted() {
-    const __VM = this;
-    await __VM.load();
+    this.init();
   },
-  // watch: {
-  //   data: {
-  //     deep: true,
-  //     handler: function () {
-  //       this.load();
-  //     },
-  //   },
-  // },
+  watch: {
+    "options.pca.count": {
+      handler: function () {
+        this.init();
+      },
+    },
+  },
 };
 </script>
 

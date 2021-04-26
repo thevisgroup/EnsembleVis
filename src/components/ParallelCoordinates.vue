@@ -72,10 +72,11 @@ export default {
   data() {
     return {
       rowsToDisplay: 160,
-      dimensions: [],
       headers: [],
       input_meta: null,
       sortBy: "Index",
+      x: null,
+      y: null,
     };
   },
   methods: {
@@ -86,14 +87,16 @@ export default {
 
       __VM.options.table.initData = await d3.csv("/assets/posterior_parameters.csv", d3.autoType);
 
+      __VM.options.table.selectedRows = __VM.options.table.initData;
+
       __VM.input_meta = await d3.csv("/assets/posterior_parameters_meta.csv", d3.autoType);
 
       const margin = { top: 30, right: -100, bottom: 10, left: -100 };
       const width = window.innerWidth - margin.left - margin.right;
       const height = window.innerHeight / 1.5 - margin.top - margin.bottom;
 
-      const x = d3.scalePoint().range([0, width]).padding(1);
-      const y = {};
+      __VM.x = d3.scalePoint().range([0, width]).padding(1);
+      __VM.y = {};
 
       const colorScheme = d3.interpolateTurbo;
 
@@ -115,11 +118,11 @@ export default {
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
       // Extract the list of dimensions and create a scale for each.
-      x.domain(
-        (__VM.dimensions = __VM.options.table.initData.columns.filter((d) => {
+      __VM.x.domain(
+        (__VM.options.pcp.dimensions = __VM.options.table.initData.columns.filter((d) => {
           return (
             d !== "Index" &&
-            (y[d] = d3
+            (__VM.y[d] = d3
               .scaleLinear()
               .domain(
                 d3.extent(__VM.options.table.initData, function (p) {
@@ -169,7 +172,7 @@ export default {
         .append("g")
         .attr("class", "foreground")
         .selectAll("path")
-        .data(__VM.options.table.initData)
+        .data(__VM.options.table.selectedRows)
         .enter()
         .append("path")
         .attr("d", path);
@@ -177,17 +180,17 @@ export default {
       // Add a group element for each dimension.
       const g = svg
         .selectAll(".dimension")
-        .data(__VM.dimensions)
+        .data(__VM.options.pcp.dimensions)
         .enter()
         .append("g")
         .attr("class", "dimension")
-        .attr("transform", (d) => "translate(" + x(d) + ")");
+        .attr("transform", (d) => "translate(" + __VM.x(d) + ")");
 
       // Add an axis and title.
       g.append("g")
         .attr("class", "axis")
         .each(function (d) {
-          d3.select(this).call(axis.scale(y[d]));
+          d3.select(this).call(axis.scale(__VM.y[d]));
         })
         .append("text")
         .attr("class", "yLabel")
@@ -200,7 +203,7 @@ export default {
         .attr("class", "brush")
         .each(function (d) {
           d3.select(this).call(
-            (y[d].brush = d3
+            (__VM.y[d].brush = d3
               .brushY()
               .extent([
                 [-10, 0],
@@ -217,8 +220,8 @@ export default {
       // Returns the path for a given data point.
       function path(d) {
         const res = d3.line()(
-          __VM.dimensions.map(function (p) {
-            return [x(p), y[p](d[p])];
+          __VM.options.pcp.dimensions.map(function (p) {
+            return [__VM.x(p), __VM.y[p](d[p])];
           })
         );
         return res;
@@ -234,14 +237,14 @@ export default {
         svg
           .selectAll(".brush")
           .filter(function (d) {
-            y[d].brushSelectionValue = d3.brushSelection(this);
+            __VM.y[d].brushSelectionValue = d3.brushSelection(this);
             return d3.brushSelection(this);
           })
           .each(function (d) {
             // Get extents of brush along each active selection axis (the Y axes)
             actives.push({
               dimension: d,
-              extent: d3.brushSelection(this).map(y[d].invert),
+              extent: d3.brushSelection(this).map(__VM.y[d].invert),
             });
           });
 
@@ -251,7 +254,6 @@ export default {
           return actives.every(function (active) {
             let result =
               active.extent[1] <= d[active.dimension] && d[active.dimension] <= active.extent[0];
-
             if (result || __VM.options.simulation_selected === d.Index) {
               local_selected.push(d);
             }
@@ -280,11 +282,46 @@ export default {
         actives.length > 0
           ? (__VM.options.table.selectedRows = [...new Set(display)])
           : (__VM.options.table.selectedRows = __VM.options.table.initData);
+
+        // trigger PCA redraw
+        __VM.options.pca.count++;
       }
 
       __VM.clickHeader(__VM.options.table.initData[0]);
     },
+    // redraw() {
+    //   const __VM = this;
 
+    //   d3.select("#parallelCoordinates > svg > g > g.foreground").remove();
+
+    //   d3.select("#parallelCoordinates > svg > g")
+    //     .append("g")
+    //     .attr("class", "foreground")
+    //     .selectAll("path")
+    //     .data(__VM.options.table.selectedRows)
+    //     .enter()
+    //     .append("path")
+    //     .attr("d", path);
+
+    //   // let pc1 = d3
+    //   //   .select("#parallelCoordinates > svg > g > g.foreground")
+    //   //   .selectAll("path")
+    //   //   .data(__VM.options.table.selectedRows);
+
+    //   // pc1.exit().remove();
+
+    //   // pc1.enter().append("path").attr("d", path);
+
+    //   // Returns the path for a given data point.
+    //   function path(d) {
+    //     const res = d3.line()(
+    //       __VM.options.pcp.dimensions.map(function (p) {
+    //         return [__VM.x(p), __VM.y[p](d[p])];
+    //       })
+    //     );
+    //     return res;
+    //   }
+    // },
     getBarVariant(data) {
       return `background-color: ${tableColor(data)};`;
     },
@@ -318,7 +355,6 @@ export default {
       }
     },
     clickHeader(item) {
-      console.log(item);
       const __VM = this;
 
       __VM.options.simulation_selected = item.Index;
@@ -371,7 +407,13 @@ export default {
       }, 250);
     });
   },
-  watch: {},
+  watch: {
+    "options.pcp.count": {
+      handler: function () {
+        this.init();
+      },
+    },
+  },
 };
 </script>
 

@@ -1,5 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
+
 Vue.use(Vuex);
 
 const options = {
@@ -13,6 +14,14 @@ const options = {
       showAvgLine: true,
       initData: [],
       selectedRows: [],
+    },
+    pca: {
+      colorMappedBy: null,
+      count: 0,
+    },
+    pcp: {
+      dimensions: null,
+      count: 0,
     },
   },
   mutations: {},
