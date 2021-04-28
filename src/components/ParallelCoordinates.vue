@@ -87,7 +87,9 @@ export default {
 
       __VM.options.table.initData = await d3.csv("/assets/posterior_parameters.csv", d3.autoType);
 
-      __VM.options.table.selectedRows = __VM.options.table.initData;
+      if (__VM.options.table.selectedRows.length === 0) {
+        __VM.options.table.selectedRows = __VM.options.table.initData;
+      }
 
       __VM.input_meta = await d3.csv("/assets/posterior_parameters_meta.csv", d3.autoType);
 
@@ -227,7 +229,7 @@ export default {
         return res;
       }
 
-      __VM.options.table.selectedRows = __VM.options.table.initData;
+      // __VM.options.table.selectedRows = __VM.options.table.initData;
 
       let display = [];
       let actives = [];
