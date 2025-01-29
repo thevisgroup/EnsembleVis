@@ -9,11 +9,13 @@
     "format": "eslint \"src/*\" --fix && prettier \"src/*.{js,vue}\" --write"
   },
   "dependencies": {
+    "bootstrap": "5.3.3",
     "bootstrap-vue": "2.21.2",
     "core-js": "3.6.5",
     "d3": "6.2.0",
     "jquery": "3.5.0",
     "vue": "2.6.12",
+    "vue-loader": "15.9.8",
     "vue-router": "3.4.8",
     "vuex": "3.5.1"
   },

@@ -167,17 +167,30 @@ export default {
 
       // Generate color legends
       dimensions.forEach((dimension, i) => {
-        svg
-          .append("rect")
-          .attr("x", width - margin.right * 2)
-          .attr("y", i * 20)
-          .attr("width", 10)
-          .attr("height", 10)
-          .style("fill", color(i));
+        if (dimension === "R_mean") {
+          svg
+            .append("line")
+            .attr("x1", width - margin.right * 2.5)
+            .attr("x2", width - margin.right * 2.2 + 10)
+            .attr("y1", i * 20 + 4)
+            .attr("y2", i * 20 + 4)
+            .style("stroke", color(i))
+            .style("stroke-width", 2)
+            .style("stroke-dasharray", "4,4");
+        } else {
+          svg
+            .append("line")
+            .attr("x1", width - margin.right * 2.5)
+            .attr("x2", width - margin.right * 2.2 + 10)
+            .attr("y1", i * 20 + 4)
+            .attr("y2", i * 20 + 4)
+            .style("stroke", color(i))
+            .style("stroke-width", 2);
+        }
 
         svg
           .append("text")
-          .attr("x", width - margin.right * 1.5)
+          .attr("x", width - margin.right * 1.7)
           .attr("y", i * 20 + 10)
           .text(__VM.getRealHeader(dimension));
       });
