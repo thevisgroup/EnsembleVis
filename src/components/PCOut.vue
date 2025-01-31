@@ -28,22 +28,29 @@ export default {
         d3.autoType
       );
 
-      let avgPolylines = await d3.csv(
+      const avgPolylines = await d3.csv(
         `/assets/data/output/simu_${__VM.data.simulation_selected}/avgPolyline.csv`,
         d3.autoType
       );
+
       // add age_group axis
       // eslint-disable-next-line vue/no-mutating-props
       __VM.data.pcdata.columns.unshift("age_group");
-      __VM.data.pcdata.forEach((i) => (i["age_group"] = __VM.data.age_selected));
+      for (const i of __VM.data.pcdata) {
+        i.age_group = __VM.data.age_selected;
+      }
 
       // add type for highlighting
       // eslint-disable-next-line vue/no-mutating-props
       __VM.data.pcdata.columns.push("type");
-      __VM.data.pcdata.forEach((i) => (i["type"] = "data"));
+      for (const i of __VM.data.pcdata) {
+        i.type = "data";
+      }
 
       const data = [...__VM.data.pcdata, ...avgPolylines];
       data.columns = avgPolylines.columns;
+
+      console.log(data);
 
       const margin = { top: 30, right: -50, bottom: 10, left: -50 };
       const width = window.innerWidth - margin.left - margin.right;
@@ -54,9 +61,7 @@ export default {
 
       const axis = d3.axisLeft();
 
-      let background, foreground;
-
-      d3.selectAll(`#parallelCoordinatesOutput > svg`).remove();
+      d3.selectAll("#parallelCoordinatesOutput > svg").remove();
 
       const svg = d3
         .select("#parallelCoordinatesOutput")
@@ -70,15 +75,17 @@ export default {
         )
         .attr("preserveAspectRatio", "xMinYMin")
         .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
       // Extract the list of dimensions and create a scale for each.
       x.domain(
+        // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
         (__VM.dimensions = data.columns.filter((d) => {
           return (
             !d.includes("min") &&
             !d.includes("max") &&
             !d.includes("type") &&
+            // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
             (y[d] = d3
               .scaleLinear()
               .domain(d3.extent(data, (p) => +p[d]))
@@ -91,7 +98,7 @@ export default {
 
       // Add grey background lines for context.
       // eslint-disable-next-line no-unused-vars
-      background = svg
+      const background = svg
         .append("g")
         .attr("class", "background")
         .selectAll("path")
@@ -100,11 +107,11 @@ export default {
         .append("path")
         .attr("d", path);
 
-      let defs = svg.append("defs");
+      const defs = svg.append("defs");
 
       // dot for average polylines
       const avgPolylineDot = (color) => {
-        let id = color.replace(/\D+/g, "");
+        const id = color.replace(/\D+/g, "");
         defs
           .append("marker")
           .attr("id", id)
@@ -119,11 +126,11 @@ export default {
           .attr("r", 10)
           .style("fill", color);
 
-        return "url(#" + id + ")";
+        return `url(#${id})`;
       };
 
       // Add blue foreground lines for focus.
-      foreground = svg
+      const foreground = svg
         .append("g")
         // .attr("class", "foreground")
         .selectAll("path")
@@ -131,11 +138,11 @@ export default {
         .enter()
         .append("path")
         .attr("stroke", (d) => {
-          switch (d["type"]) {
+          switch (d.type) {
             case "data":
               return "steelblue";
             case "average":
-              return color(parseInt(d["age_group"]) / 9);
+              return color(Number.parseInt(d.age_group) / 9);
             case "std":
               return "#FF0000";
             case "aoa":
@@ -145,26 +152,26 @@ export default {
           }
         })
         .attr("stroke-width", (d) => {
-          switch (d["type"]) {
+          switch (d.type) {
             case "data":
               return 1;
             case "average":
-              return 2;
+              return 4;
             case "std":
-              return 3;
+              return 4;
             case "aoa":
-              return 3;
+              return 4;
             default:
               break;
           }
         })
         .attr("fill", "none")
         .attr("marker-mid", (d) => {
-          switch (d["type"]) {
+          switch (d.type) {
             case "data":
               return "";
             case "average":
-              return avgPolylineDot(color(parseInt(d["age_group"]) / 9));
+              return avgPolylineDot(color(Number.parseInt(d.age_group) / 9));
             case "std":
               return avgPolylineDot("#FF0000");
             default:
@@ -172,7 +179,7 @@ export default {
           }
         })
         .attr("stroke-dasharray", (d) => {
-          switch (d["type"]) {
+          switch (d.type) {
             case "std":
               return "2 5";
             case "aoa":
@@ -190,7 +197,7 @@ export default {
         .enter()
         .append("g")
         .attr("class", "dimension")
-        .attr("transform", (d) => "translate(" + x(d) + ")");
+        .attr("transform", (d) => `translate(${x(d)})`);
 
       // Add an axis and title.
       g.append("g")
@@ -212,6 +219,7 @@ export default {
         .attr("class", "brush")
         .each(function (d) {
           d3.select(this).call(
+            // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
             (y[d].brush = d3
               .brushY()
               .extent([
@@ -228,11 +236,7 @@ export default {
 
       // Returns the path for a given data point.
       function path(d) {
-        const res = d3.line()(
-          __VM.dimensions.map(function (p) {
-            return [x(p), y[p](d[p])];
-          })
-        );
+        const res = d3.line()(__VM.dimensions.map((p) => [x(p), y[p](d[p])]));
         return res;
       }
 
@@ -253,11 +257,11 @@ export default {
             });
           });
 
-        let local_selected = [];
+        const local_selected = [];
         // Update foreground to only display selected values
-        foreground.style("display", function (d) {
-          return actives.every(function (active) {
-            let result =
+        foreground.style("display", (d) =>
+          actives.every((active) => {
+            const result =
               active.extent[1] <= d[active.dimension] && d[active.dimension] <= active.extent[0];
             if (result) {
               local_selected.push(d);
@@ -265,22 +269,22 @@ export default {
             return result;
           })
             ? null
-            : "none";
-        });
+            : "none"
+        );
 
         const display = [];
-        local_selected.forEach((l) => {
+        for (const l of local_selected) {
           if (local_selected.filter((s) => s.Index === l.Index).length === actives.length) {
             display.push(l);
           }
-        });
+        }
 
         return Promise.resolve();
       }
 
       // interactive legends
 
-      var table = d3
+      const table = d3
         .select("#parallelCoordinatesOutput_legend")
         .html("")
         .selectAll(".row")
@@ -293,7 +297,7 @@ export default {
       table
         .append("span")
         .attr("class", (d) => {
-          switch (d["type"]) {
+          switch (d.type) {
             case "average":
               return "legend-";
             case "std":
@@ -305,11 +309,11 @@ export default {
           }
         })
         .style("background", (d) => {
-          switch (d["type"]) {
+          switch (d.type) {
             case "data":
               return "";
             case "average":
-              return color(parseInt(d["age_group"]) / 9);
+              return color(Number.parseInt(d.age_group) / 9);
             // case "std":
             //   return "#FF0000";
             // case "aoa":
@@ -319,12 +323,12 @@ export default {
           }
         });
 
-      table.append("span").text(function (d) {
-        switch (d["type"]) {
+      table.append("span").text((d) => {
+        switch (d.type) {
           case "data":
             return "";
           case "average":
-            return "μ of group " + d["age_group"];
+            return `μ of group ${d.age_group}`;
           case "std":
             return "σ Standard Deviation";
           case "aoa":
@@ -336,14 +340,13 @@ export default {
     },
   },
   async mounted() {
-    const __VM = this;
-    await __VM.load();
+    await this.load();
 
     let resizeTimer;
     d3.select(window).on("resize", async () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(async () => {
-        await __VM.load();
+        await this.load();
       }, 250);
     });
   },
